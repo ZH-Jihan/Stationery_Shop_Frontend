@@ -1,19 +1,48 @@
 import AdminDashbord from "@/pages/Admin/AdminDashbord";
-import CreateUser from "@/pages/Admin/User-Management/CreateUser";
-
-export const adminPaths = [
+import AddProduct from "@/pages/Admin/Product-Management/AddProduct";
+import DeleteProducet from "@/pages/Admin/Product-Management/DeleteProducet";
+import UpdateProduct from "@/pages/Admin/Product-Management/UpdateProduct";
+import Product from "@mui/icons-material/ManageHistoryTwoTone";
+import Profole from "@mui/icons-material/Person";
+import { ReactNode } from "react";
+type TDesboardPath = {
+  name?: string;
+  path?: string;
+  element?: ReactNode;
+  icon?: ReactNode;
+  kind?: "header" | "divider";
+  children?: TDesboardPath[];
+};
+export const adminPaths: TDesboardPath[] = [
   {
     name: "Dashboard",
     path: "dashboard",
     element: <AdminDashbord />,
+    icon: <Profole />,
   },
   {
-    name: "User Management",
+    kind: "header",
+    name: "Product",
+  },
+  {
+    path: "products",
+    icon: <Product />,
+    name: "Product Management",
     children: [
       {
-        name: "Create User",
-        path: "create-user",
-        element: <CreateUser />,
+        name: "Add New Product",
+        path: "create-product",
+        element: <AddProduct />,
+      },
+      {
+        name: "Update Product",
+        path: "update-product",
+        element: <UpdateProduct />,
+      },
+      {
+        name: "Delete Product",
+        path: "delete-product",
+        element: <DeleteProducet />,
       },
     ],
   },

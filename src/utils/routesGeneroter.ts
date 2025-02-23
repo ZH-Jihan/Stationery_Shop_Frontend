@@ -1,4 +1,6 @@
 import { TPath, TRoute } from "@/types/route&Sidebar";
+import { Router } from "@toolpad/core/AppProvider";
+import React from "react";
 
 export const routeGenarator = (itemslist: TPath[]) => {
   const routes = itemslist.reduce((acc: TRoute[], item) => {
@@ -21,3 +23,17 @@ export const routeGenarator = (itemslist: TPath[]) => {
   }, []);
   return routes;
 };
+
+export function useDemoRouter(initialPath: string): Router {
+  const [pathname, setPathname] = React.useState(initialPath);
+
+  const router = React.useMemo(() => {
+    return {
+      pathname,
+      searchParams: new URLSearchParams(),
+      navigate: (path: string | URL) => setPathname(String(path)),
+    };
+  }, [pathname]);
+
+  return router;
+}

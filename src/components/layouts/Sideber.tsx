@@ -2,7 +2,6 @@ import { userRole } from "@/constants/route&Sideber";
 import { TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
 import { useAppSelector } from "@/redux/hooks";
 import { adminPaths } from "@/routes/admin.routes";
-import { facultyPaths } from "@/routes/faculty.routes";
 import { userPath } from "@/routes/user.routes";
 import { sidebarItemsGenerator } from "@/utils/sideBarGenerator";
 import { verifyToken } from "@/utils/verifyToken";
@@ -23,9 +22,6 @@ const Sideber = () => {
     switch (user?.role) {
       case userRole.ADMIN:
         sidebarlist = sidebarItemsGenerator(adminPaths, userRole.ADMIN);
-        break;
-      case userRole.FACULTY:
-        sidebarlist = sidebarItemsGenerator(facultyPaths, userRole.FACULTY);
         break;
       case userRole.USER:
         sidebarlist = sidebarItemsGenerator(userPath, userRole.USER);

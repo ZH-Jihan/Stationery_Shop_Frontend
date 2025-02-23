@@ -12,6 +12,14 @@ export type TSidebarItem =
     }
   | undefined;
 
+export type TDesboardPath = {
+  name?: string;
+  path?: string;
+  kind?: "header" | "divider";
+  icon?: ReactNode;
+  element?: ReactNode;
+  children?: TDesboardPath[];
+};
 export type TPath = {
   name?: string;
   path?: string;

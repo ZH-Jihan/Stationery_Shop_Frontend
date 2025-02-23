@@ -1,4 +1,8 @@
+import { TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
+import { useAppSelector } from "@/redux/hooks";
+import { verifyToken } from "@/utils/verifyToken";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -31,9 +35,18 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   padding: "8px 12px",
 }));
 
+const menuItems = [
+  { label: "Home", path: "/" },
+  { label: "Create User", path: "/create-user" },
+];
 export default function AppAppBar() {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const token = useAppSelector(useCurrentToken);
+  let user;
+  if (token) {
+    user = verifyToken(token) as TUser;
+  }
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
@@ -57,56 +70,60 @@ export default function AppAppBar() {
           >
             <Sitemark />
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              <Button variant="text" color="info" size="small">
-                Features
-              </Button>
-              <Button variant="text" color="info" size="small">
-                Testimonials
-              </Button>
-              <Button variant="text" color="info" size="small">
-                Highlights
-              </Button>
-              <Button variant="text" color="info" size="small">
-                Pricing
-              </Button>
-              <Button
-                variant="text"
-                color="info"
-                size="small"
-                sx={{ minWidth: 0 }}
-              >
-                FAQ
-              </Button>
-              <Button
-                variant="text"
-                color="info"
-                size="small"
-                sx={{ minWidth: 0 }}
-              >
-                Blog
-              </Button>
+              {menuItems.map((item) => (
+                <Button
+                  onClick={() => navigate(item.path)}
+                  variant="text"
+                  color="info"
+                  size="small"
+                >
+                  {item?.label}
+                </Button>
+              ))}
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              gap: 1,
-              alignItems: "center",
-            }}
-          >
-            <Button
-              onClick={() => navigate("/login")}
-              color="primary"
-              variant="text"
-              size="small"
+          {!user?.role ? (
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                gap: 1,
+                alignItems: "center",
+              }}
             >
-              Sign in
-            </Button>
-            <Button color="primary" variant="contained" size="small">
-              Sign up
-            </Button>
-            <ColorModeIconDropdown />
-          </Box>
+              <Button
+                onClick={() => navigate("/login")}
+                color="primary"
+                variant="text"
+                size="small"
+              >
+                Sign in
+              </Button>
+              <Button color="primary" variant="contained" size="small">
+                Sign up
+              </Button>
+              <ColorModeIconDropdown />
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                gap: 1,
+                alignItems: "center",
+              }}
+            >
+              <Button
+                onClick={() => navigate(`/${user?.role}/dashboard`)}
+                variant="text"
+                color="info"
+                size="small"
+              >
+                <DashboardIcon />
+                Dashboard
+              </Button>
+              <ColorModeIconDropdown />
+            </Box>
+          )}
+
           <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
             <ColorModeIconDropdown size="medium" />
             <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
@@ -133,24 +150,36 @@ export default function AppAppBar() {
                     <CloseRoundedIcon />
                   </IconButton>
                 </Box>
-
-                <MenuItem>Features</MenuItem>
-                <MenuItem>Testimonials</MenuItem>
-                <MenuItem>Highlights</MenuItem>
-                <MenuItem>Pricing</MenuItem>
-                <MenuItem>FAQ</MenuItem>
-                <MenuItem>Blog</MenuItem>
+                {menuItems.map((item) => (
+                  <MenuItem onClick={() => navigate(item.path)}>
+                    {item.label}
+                  </MenuItem>
+                ))}
                 <Divider sx={{ my: 3 }} />
-                <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
-                    Sign up
+                {!user?.role ? (
+                  <>
+                    <MenuItem>
+                      <Button color="primary" variant="contained" fullWidth>
+                        Sign up
+                      </Button>
+                    </MenuItem>
+                    <MenuItem>
+                      <Button color="primary" variant="outlined" fullWidth>
+                        Sign in
+                      </Button>
+                    </MenuItem>
+                  </>
+                ) : (
+                  <Button
+                    onClick={() => navigate(`/${user?.role}/dashboard`)}
+                    variant="text"
+                    color="info"
+                    size="small"
+                  >
+                    <DashboardIcon />
+                    Dashboard
                   </Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth>
-                    Sign in
-                  </Button>
-                </MenuItem>
+                )}
               </Box>
             </Drawer>
           </Box>
