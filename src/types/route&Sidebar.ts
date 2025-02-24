@@ -7,7 +7,7 @@ export type TRoute = {
 export type TSidebarItem =
   | {
       key: string;
-      label: ReactNode;
+      label: { to: string; name: string };
       children?: TSidebarItem[];
     }
   | undefined;

@@ -1,7 +1,8 @@
 import AdminDashbord from "@/pages/Admin/AdminDashbord";
-import AddProduct from "@/pages/Admin/Product-Management/AddProduct";
-import DeleteProducet from "@/pages/Admin/Product-Management/DeleteProducet";
-import UpdateProduct from "@/pages/Admin/Product-Management/UpdateProduct";
+
+import AddProduct from "@/pages/Dashbord/Admin/Product Management/AddProduct";
+import SeeAllProduct from "@/pages/Dashbord/Admin/Product Management/SeeAllProduct";
+import UpdateProduct from "@/pages/Dashbord/Admin/Product Management/UpdateProduct";
 import Product from "@mui/icons-material/ManageHistoryTwoTone";
 import Profole from "@mui/icons-material/Person";
 import { ReactNode } from "react";
@@ -25,24 +26,22 @@ export const adminPaths: TDesboardPath[] = [
     name: "Product",
   },
   {
-    path: "products",
     icon: <Product />,
     name: "Product Management",
     children: [
+      {
+        name: "Vew all Products",
+        path: "all-products",
+        element: <SeeAllProduct />,
+      },
       {
         name: "Add New Product",
         path: "create-product",
         element: <AddProduct />,
       },
       {
-        name: "Update Product",
-        path: "update-product",
+        path: "update-product/:productId",
         element: <UpdateProduct />,
-      },
-      {
-        name: "Delete Product",
-        path: "delete-product",
-        element: <DeleteProducet />,
       },
     ],
   },

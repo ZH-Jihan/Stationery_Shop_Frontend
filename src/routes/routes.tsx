@@ -1,5 +1,5 @@
 import App from "@/App";
-import Dashboard from "@/components/layouts/Dashboard";
+import FDashboard from "@/components/layouts/Dashboard/FDashboard";
 import ProtectedRoute from "@/components/layouts/ProtectedRoute";
 import SignIn from "@/pages/SignIn";
 import { routeGenarator } from "@/utils/routesGeneroter";
@@ -18,7 +18,7 @@ export const route = createBrowserRouter([
     path: "/admin",
     element: (
       <ProtectedRoute role="admin">
-        <Dashboard />
+        <FDashboard />
       </ProtectedRoute>
     ),
     children: routeGenarator(adminPaths),
@@ -27,7 +27,7 @@ export const route = createBrowserRouter([
     path: "/user",
     element: (
       <ProtectedRoute role="user">
-        <Dashboard />
+        <FDashboard />
       </ProtectedRoute>
     ),
     children: routeGenarator(userPath),

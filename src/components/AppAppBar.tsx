@@ -3,6 +3,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { verifyToken } from "@/utils/verifyToken";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import Home from "@mui/icons-material/Home";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -36,7 +37,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }));
 
 const menuItems = [
-  { label: "Home", path: "/" },
+  { label: "Home", path: "/", icon: <Home /> },
   { label: "Create User", path: "/create-user" },
 ];
 export default function AppAppBar() {
@@ -60,7 +61,7 @@ export default function AppAppBar() {
         boxShadow: 0,
         bgcolor: "transparent",
         backgroundImage: "none",
-        mt: "calc(var(--template-frame-height, 0px) + 8px)",
+        mt: "calc(var(--template-frame-height, 0px) + 2px)",
       }}
     >
       <Container maxWidth="lg">
@@ -77,7 +78,8 @@ export default function AppAppBar() {
                   color="info"
                   size="small"
                 >
-                  {item?.label}
+                  {item?.icon}
+                  <span style={{paddingLeft: 8}}>{item?.label}</span>
                 </Button>
               ))}
             </Box>
@@ -118,7 +120,8 @@ export default function AppAppBar() {
                 size="small"
               >
                 <DashboardIcon />
-                Dashboard
+                <span style={{paddingLeft: 8}}>Dashboard</span>
+                
               </Button>
               <ColorModeIconDropdown />
             </Box>

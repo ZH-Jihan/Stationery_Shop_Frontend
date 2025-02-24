@@ -43,7 +43,7 @@ function useDemoRouter(initialPath: string): Router {
 }
 
 interface DashboardProps {
-  children: React.ReactNode;
+  window: Window;
 }
 function CustomAppTitle() {
   return (

@@ -13,7 +13,9 @@ export default function MarketingPage(props: { disableCustomTheme?: boolean }) {
         <AppAppBar />
       </div>
 
-      <div>
+      <div
+        style={{ marginTop: 60}}
+      >
         <Outlet />
         {/* <LogoCollection /> */}
         {/* <Features /> */}
@@ -26,8 +28,8 @@ export default function MarketingPage(props: { disableCustomTheme?: boolean }) {
         <Divider />
         <FAQ />
         <Divider /> */}
-        <Footer />
       </div>
+      <Footer />
     </AppTheme>
   );
 }
