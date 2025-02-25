@@ -1,5 +1,5 @@
-import CreateUser from "@/pages/Admin/User-Management/CreateUser";
 import Home from "@/pages/Home";
+import AllProducts from "@/pages/Products/AllProducts";
 
 export const normalUserPath = [
   {
@@ -8,8 +8,8 @@ export const normalUserPath = [
     element: <Home />,
   },
   {
-    name: "Create User",
-    path: "create-user",
-    element: <CreateUser />,
-  },
+    name: "All Products",
+    path: "/all-products",
+    element: <AllProducts />,
+  }
 ];

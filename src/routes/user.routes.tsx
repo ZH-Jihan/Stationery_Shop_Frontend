@@ -1,9 +1,9 @@
-import UserDashboard from "@/pages/User/UserDashboard";
+import Profile from "@/pages/Profile";
 
 export const userPath = [
   {
-    name: "User Dashboard",
-    path: "dashboard",
-    element: <UserDashboard />,
+    name: "User Profile",
+    path: "profile",
+    element: <Profile />,
   },
 ];

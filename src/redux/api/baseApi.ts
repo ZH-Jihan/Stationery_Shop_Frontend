@@ -9,6 +9,8 @@ import {
 import { logOut, setUser } from "../features/auth/authSlice";
 import { RootState } from "../store";
 
+// Production url
+// https://store-stationery-project.vercel.app
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:8000/api",
   credentials: "include",
@@ -26,7 +28,7 @@ const customBaseQuery: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
-> = async (args, api, extraOptions) => {
+> = async (args, api, extraOptions)  => {
   let result = await baseQuery(args, api, extraOptions);
 
   if (result?.error?.status === 401) {

@@ -1,16 +1,24 @@
 import CardSection from "@/components/Card";
-import Carousol from "@/components/Carousol";
 import Loading from "@/components/Loading";
 import { useGetAllProductQuery } from "@/redux/features/product/produtcApi";
 import { Grid } from "@mui/system";
+import { useState } from "react";
 
-const Home = () => {
-  const { data: allProduct, isLoading } = useGetAllProductQuery({ limit: 4 });
-
+const AllProducts = () => {
+  const [params, setParams] = useState({});
+  const { data: allProduct, isLoading } = useGetAllProductQuery(params);
   return (
-    <>
-      <Carousol />
-
+    <div>
+      <div
+        style={{
+          textAlign: "center",
+          paddingTop: 70,
+          width: "25%",
+          margin: "auto",
+        }}
+      >
+        <h1>All Products</h1>
+      </div>
       {!allProduct || isLoading ? (
         <Loading variant="grid" />
       ) : (
@@ -20,8 +28,8 @@ const Home = () => {
           ))}
         </Grid>
       )}
-    </>
+    </div>
   );
 };
 
-export default Home;
+export default AllProducts;

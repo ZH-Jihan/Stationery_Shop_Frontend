@@ -109,7 +109,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       const user = verifyToken(res?.data?.accessToken) as TUser;
       toast.success("user logged in successfully", { id: toastId });
       dispatch(setUser({ user: user, token: res?.data?.accessToken }));
-      navigate(`/${user?.role}/dashboard`);
+      navigate(`/${user?.role}/profile`);
     } catch (err: unknown) {
       if (err instanceof Error) {
         toast.error(`Something went wrong: ${err.message}`, { id: toastId });
@@ -250,11 +250,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </Button>
             <Typography sx={{ textAlign: "center" }}>
               Don&apos;t have an account?{" "}
-              <Link
-                href="/material-ui/getting-started/templates/sign-in/"
-                variant="body2"
-                sx={{ alignSelf: "center" }}
-              >
+              <Link href="/singup" variant="body2" sx={{ alignSelf: "center" }}>
                 Sign up
               </Link>
             </Typography>

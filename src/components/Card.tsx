@@ -1,3 +1,4 @@
+import { TProductResponse } from "@/types/productType";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -5,7 +6,14 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { Grid } from "@mui/system";
-const CardSection = () => {
+import React from "react";
+
+interface TProps {
+  product: TProductResponse;
+}
+const CardSection: React.FC<TProps> = ({ product }) => {
+  console.log(product);
+
   return (
     <>
       <Grid
@@ -16,10 +24,10 @@ const CardSection = () => {
           lg: 4,
         }}
       >
-        <Card sx={{ margin: "auto" }}>
+        <Card sx={{ margin: "auto", height: "100%" }}>
           <CardMedia
             sx={{ height: 239, width: "auto", borderRadius: 2 }}
-            image="https://atwork.woolworths.com.au/wp-content/uploads/2024/12/diaries-organisers-and-planners.png"
+            image={product.image}
             title="green iguana"
           />
           <CardContent>
@@ -29,11 +37,18 @@ const CardSection = () => {
               component="div"
               sx={{ my: 1 }}
             >
-              Lizard
+              {product.name}
             </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Lizards are a widespread group of squamate reptiles, with over
-              6,000 species, ranging across all continents except Antarctica
+            <Typography
+              gutterBottom
+              variant="h6"
+              component="div"
+              sx={{ my: 1 }}
+            >
+              $-{product.price}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary", height: 50}}>
+              {product.description}
             </Typography>
           </CardContent>
           <CardActions sx={{ paddingTop: "15px" }}>

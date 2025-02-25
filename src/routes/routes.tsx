@@ -2,6 +2,7 @@ import App from "@/App";
 import FDashboard from "@/components/layouts/Dashboard/FDashboard";
 import ProtectedRoute from "@/components/layouts/ProtectedRoute";
 import SignIn from "@/pages/SignIn";
+import SignUp from "@/pages/SingUp";
 import { routeGenarator } from "@/utils/routesGeneroter";
 import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
@@ -36,5 +37,9 @@ export const route = createBrowserRouter([
   {
     path: "/login",
     element: <SignIn />,
+  },
+  {
+    path: "/singup",
+    element: <SignUp />,
   },
 ]);

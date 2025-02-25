@@ -43,7 +43,7 @@ interface AddProductProps {
 
 const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
   const isEditMode = !!productId;
-  const { data: productData } = useGetSIngleProductQuery(productId || "", {
+  const { data: productResponse } = useGetSIngleProductQuery(productId || "", {
     skip: !productId,
   });
 
@@ -64,23 +64,24 @@ const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isEditMode && productData) {
+    if (isEditMode && productResponse) {
+      const product = productResponse;
       setData({
-        name: productData.name,
-        brand: productData.brand,
-        price: productData.price,
-        image: productData.image || null,
-        category: productData.category,
-        description: productData.description,
-        quantity: productData.quantity,
-        inStock: productData.inStock,
+        name: product.name,
+        brand: product.brand,
+        price: product.price,
+        image: product.image || null,
+        category: product.category,
+        description: product.description,
+        quantity: product.quantity,
+        inStock: product.inStock,
       });
 
-      if (productData.image) {
-        setImagePreview(productData.image);
+      if (product.image) {
+        setImagePreview(product.image);
       }
     }
-  }, [productData, isEditMode]);
+  }, [productResponse, isEditMode]);
 
   const handleChange = (event) => {
     const { name, value, checked, type, files } = event.target;
@@ -116,8 +117,10 @@ const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const tostId = toast.loading("Please wait...");
+    const toastId = toast.loading("Please wait...");
     const formData = new FormData();
+
+    // Separate image from other data
     const { image, ...restData } = data;
 
     // Append image only if it's a File (new upload)
@@ -125,6 +128,7 @@ const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
       formData.append("file", image);
     }
 
+    // Append product data
     formData.append("data", JSON.stringify(restData));
 
     try {
@@ -135,21 +139,15 @@ const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
           id: productId,
           body: formData,
         }).unwrap();
-        toast.success(res.message, { id: tostId });
         console.log(res);
+        toast.success(res.message, { id: toastId });
       } else {
         const res = await createProduct(formData).unwrap();
-        if (res?.success === true) {
-          toast.success(res.message, { id: tostId });
-          console.log(res);
-
-          event.target.value = null;
-        }
+        toast.success(res.message, { id: toastId });
       }
       onSuccess?.();
     } catch (error: any) {
-      toast.success(`Error: ${error?.message}`, { id: tostId });
-      console.error("Submission error:", error);
+      toast.error(error?.message || "An error occurred", { id: toastId });
     }
   };
 

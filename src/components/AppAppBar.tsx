@@ -1,10 +1,16 @@
-import { TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
-import { useAppSelector } from "@/redux/hooks";
+import {
+  logOut,
+  TUser,
+  useCurrentToken,
+} from "@/redux/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { verifyToken } from "@/utils/verifyToken";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import Home from "@mui/icons-material/Home";
+import Logout from "@mui/icons-material/LogoutOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
+import Product from "@mui/icons-material/ProductionQuantityLimitsRounded";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -36,19 +42,20 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   padding: "8px 12px",
 }));
 
-const menuItems = [
-  { label: "Home", path: "/", icon: <Home /> },
-  { label: "Create User", path: "/create-user" },
-];
-export default function AppAppBar() {
+const AppAppBar: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   const token = useAppSelector(useCurrentToken);
-  let user;
+  let user: TUser | null = null;
   if (token) {
     user = verifyToken(token) as TUser;
   }
 
+  const dispatch = useAppDispatch();
+  const menuItems = [
+    { label: "Home", path: "/", icon: <Home /> },
+    { label: "All Products", path: "/all-products", icon: <Product /> },
+  ];
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
@@ -79,9 +86,20 @@ export default function AppAppBar() {
                   size="small"
                 >
                   {item?.icon}
-                  <span style={{paddingLeft: 8}}>{item?.label}</span>
+                  <span style={{ paddingLeft: 8 }}>{item?.label}</span>
                 </Button>
               ))}
+              {user?.role && (
+                <Button
+                  onClick={() => navigate(`/${user?.role}/profile`)}
+                  variant="text"
+                  color="info"
+                  size="small"
+                >
+                  <DashboardIcon />
+                  <span style={{ paddingLeft: 8 }}>Dashboard</span>
+                </Button>
+              )}
             </Box>
           </Box>
           {!user?.role ? (
@@ -100,7 +118,12 @@ export default function AppAppBar() {
               >
                 Sign in
               </Button>
-              <Button color="primary" variant="contained" size="small">
+              <Button
+                onClick={() => navigate("/singup")}
+                color="primary"
+                variant="contained"
+                size="small"
+              >
                 Sign up
               </Button>
               <ColorModeIconDropdown />
@@ -114,14 +137,13 @@ export default function AppAppBar() {
               }}
             >
               <Button
-                onClick={() => navigate(`/${user?.role}/dashboard`)}
+                onClick={() => dispatch(logOut())}
                 variant="text"
                 color="info"
                 size="small"
               >
-                <DashboardIcon />
-                <span style={{paddingLeft: 8}}>Dashboard</span>
-                
+                <Logout />
+                LogOut
               </Button>
               <ColorModeIconDropdown />
             </Box>
@@ -162,25 +184,35 @@ export default function AppAppBar() {
                 {!user?.role ? (
                   <>
                     <MenuItem>
-                      <Button color="primary" variant="contained" fullWidth>
+                      <Button
+                        color="primary"
+                        onClick={() => navigate("/singup")}
+                        variant="contained"
+                        fullWidth
+                      >
                         Sign up
                       </Button>
                     </MenuItem>
                     <MenuItem>
-                      <Button color="primary" variant="outlined" fullWidth>
+                      <Button
+                        color="primary"
+                        onClick={() => navigate("/login")}
+                        variant="outlined"
+                        fullWidth
+                      >
                         Sign in
                       </Button>
                     </MenuItem>
                   </>
                 ) : (
                   <Button
-                    onClick={() => navigate(`/${user?.role}/dashboard`)}
+                    onClick={() => dispatch(logOut())}
                     variant="text"
                     color="info"
                     size="small"
                   >
-                    <DashboardIcon />
-                    Dashboard
+                    <Logout />
+                    LogOut
                   </Button>
                 )}
               </Box>
@@ -190,4 +222,6 @@ export default function AppAppBar() {
       </Container>
     </AppBar>
   );
-}
+};
+
+export default AppAppBar;
