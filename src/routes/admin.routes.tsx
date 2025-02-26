@@ -1,9 +1,8 @@
-
 import SeeAllOrderForAdmin from "@/pages/Dashbord/Admin/Order Management/SeeAllOrder";
 import AddProduct from "@/pages/Dashbord/Admin/Product Management/AddProduct";
 import SeeAllProduct from "@/pages/Dashbord/Admin/Product Management/SeeAllProduct";
 import UpdateProduct from "@/pages/Dashbord/Admin/Product Management/UpdateProduct";
-import Profile from "@/pages/Profile";
+import CustomerDashboard from "@/pages/Profile1";
 import Product from "@mui/icons-material/ManageHistoryTwoTone";
 import Profole from "@mui/icons-material/Person";
 import { ReactNode } from "react";
@@ -16,11 +15,10 @@ type TDesboardPath = {
   children?: TDesboardPath[];
 };
 export const adminPaths: TDesboardPath[] = [
-  
   {
     name: "Profile",
     path: "profile",
-    element: <Profile />,
+    element: <CustomerDashboard />,
     icon: <Profole />,
   },
   {

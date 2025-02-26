@@ -44,6 +44,7 @@ export default function MenuContent() {
       default:
         break;
     }
+    console.log(menu);
 
     return (
       <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>

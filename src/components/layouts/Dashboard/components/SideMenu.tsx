@@ -1,3 +1,6 @@
+import { TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
+import { useAppSelector } from "@/redux/hooks";
+import { verifyToken } from "@/utils/verifyToken";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -5,6 +8,7 @@ import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
 import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
+import { useNavigate } from "react-router-dom";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
 
@@ -22,6 +26,12 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function SideMenu() {
+  
+  const token = useAppSelector(useCurrentToken);
+  let user: TUser | null = null;
+  if (token) {
+    user = verifyToken(token) as TUser;
+  }
   return (
     <Drawer
       variant="permanent"
@@ -56,7 +66,7 @@ export default function SideMenu() {
         <Avatar
           sizes="small"
           alt="Riley Carter"
-          src="/static/images/avatar/7.jpg"
+          src={user?.img ? user?.img : ""}
           sx={{ width: 36, height: 36 }}
         />
         <Box sx={{ mr: "auto" }}>
@@ -64,10 +74,10 @@ export default function SideMenu() {
             variant="body2"
             sx={{ fontWeight: 500, lineHeight: "16px" }}
           >
-            Riley Carter
+            {user?.name}
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            riley@email.com
+            {user?.email}
           </Typography>
         </Box>
         <OptionsMenu />
