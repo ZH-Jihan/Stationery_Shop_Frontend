@@ -15,28 +15,28 @@ const Carousol = () => {
       <div>
         <img
           style={contentStyle}
-          src={"../../../public/carusol-1.jpg"}
+          src="https://res.cloudinary.com/dgctadcb2/image/upload/f_auto,q_auto/evdzsw3fit6rilixnbvd"
           alt=""
         />
       </div>
       <div>
         <img
           style={contentStyle}
-          src={"../../../public/carusol-2.jpg"}
+          src="https://res.cloudinary.com/dgctadcb2/image/upload/f_auto,q_auto/pfdjfivc1cimb6jtur0p"
           alt=""
         />
       </div>
       <div>
         <img
           style={contentStyle}
-          src={"../../../public/carusol-3.jpg"}
+          src="https://res.cloudinary.com/dgctadcb2/image/upload/f_auto,q_auto/vpwpb7yhttyttn6hpwjx"
           alt=""
         />
       </div>
       <div>
         <img
           style={contentStyle}
-          src={"../../../public/carusol-4.jpg"}
+          src="https://res.cloudinary.com/dgctadcb2/image/upload/f_auto,q_auto/l8pzfzugicu5lsohjaie"
           alt=""
         />
       </div>

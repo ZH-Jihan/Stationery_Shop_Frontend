@@ -6,7 +6,6 @@ const featuredProductApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllProduct: builder.query({
       query: (args) => {
-        console.log(args);
         const params = new URLSearchParams();
 
         if (args) {

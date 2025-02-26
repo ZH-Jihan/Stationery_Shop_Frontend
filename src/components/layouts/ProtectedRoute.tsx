@@ -6,15 +6,15 @@ import {
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { verifyToken } from "@/utils/verifyToken";
 import { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 type TProtectedRoute = {
   children: ReactNode;
-  role: string | undefined;
+  role: "user" | "admin";
 };
 
 const ProtectedRoute = ({ children, role }: TProtectedRoute) => {
-  const navigate = useNavigate();
+  console.log(role);
   const token = useAppSelector(useCurrentToken);
   const dispatch = useAppDispatch();
 
@@ -23,12 +23,12 @@ const ProtectedRoute = ({ children, role }: TProtectedRoute) => {
     user = verifyToken(token);
   }
 
-  if (role !== "undefined" && (user as TUser)?.role !== role) {
+  if ((user as TUser)?.role !== role) {
     dispatch(logOut());
-    navigate("/login", { replace: true });
+    return <Navigate to="/login" replace={true} />;
   }
   if (!token) {
-    navigate("/login", { replace: true });
+    return <Navigate to="/login" replace={true} />;
   }
 
   return children;

@@ -41,7 +41,7 @@ interface AddProductProps {
   onSuccess?: () => void;
 }
 
-const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
+const AddProduct: React.FC<AddProductProps> = ({ productId }) => {
   const isEditMode = !!productId;
   const { data: productResponse } = useGetSIngleProductQuery(productId || "", {
     skip: !productId,
@@ -120,20 +120,20 @@ const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
     const toastId = toast.loading("Please wait...");
     const formData = new FormData();
 
-    // Separate image from other data
-    const { image, ...restData } = data;
+    const restData = { ...data };
+    const image = restData.image;
 
-    // Append image only if it's a File (new upload)
+    // Handle image file separately
     if (image instanceof File) {
       formData.append("file", image);
+      delete restData.image; // Remove image from restData to avoid duplication
     }
 
     // Append product data
     formData.append("data", JSON.stringify(restData));
-
     try {
       if (isEditMode) {
-        console.log(formData);
+        console.log(formData.values());
 
         const res = await updateProduct({
           id: productId,
@@ -145,7 +145,6 @@ const AddProduct: React.FC<AddProductProps> = ({ productId, onSuccess }) => {
         const res = await createProduct(formData).unwrap();
         toast.success(res.message, { id: toastId });
       }
-      onSuccess?.();
     } catch (error: any) {
       toast.error(error?.message || "An error occurred", { id: toastId });
     }

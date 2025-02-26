@@ -7,12 +7,13 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { Grid } from "@mui/system";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface TProps {
   product: TProductResponse;
 }
 const CardSection: React.FC<TProps> = ({ product }) => {
-  console.log(product);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -26,7 +27,7 @@ const CardSection: React.FC<TProps> = ({ product }) => {
       >
         <Card sx={{ margin: "auto", height: "100%" }}>
           <CardMedia
-            sx={{ height: 239, width: "auto", borderRadius: 2 }}
+            sx={{ height: 230, borderRadius: 2 }}
             image={product.image}
             title="green iguana"
           />
@@ -35,7 +36,7 @@ const CardSection: React.FC<TProps> = ({ product }) => {
               gutterBottom
               variant="h5"
               component="div"
-              sx={{ my: 1 }}
+              sx={{ my: 1, height: 30 }}
             >
               {product.name}
             </Typography>
@@ -47,7 +48,10 @@ const CardSection: React.FC<TProps> = ({ product }) => {
             >
               $-{product.price}
             </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary", height: 50}}>
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", height: 50 }}
+            >
               {product.description}
             </Typography>
           </CardContent>
@@ -63,6 +67,7 @@ const CardSection: React.FC<TProps> = ({ product }) => {
             <Button
               variant="text"
               color="primary"
+              onClick={() => navigate(`/produc-detail/${product._id}`)}
               size="small"
               sx={{ minWidth: 0, border: "1px solid", boxShadow: 5 }}
             >
