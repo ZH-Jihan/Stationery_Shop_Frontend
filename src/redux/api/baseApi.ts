@@ -10,7 +10,7 @@ import { logOut, setUser } from "../features/auth/authSlice";
 import { RootState } from "../store";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://store-stationery-project.vercel.app/api",
+  baseUrl: "http://localhost:8000/api",
   credentials: "include",
   prepareHeaders(headers, { getState }) {
     const token = (getState() as RootState).auth.token;
@@ -26,14 +26,14 @@ const customBaseQuery: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
-> = async (args, api, extraOptions)  => {
+> = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
   if (result?.error?.status === 401) {
     console.log("call for access token");
 
     const res = await fetch(
-      "https://store-stationery-project.vercel.app/api/auth/create-accessToken",
+      "http://localhost:8000/api/auth/create-accessToken",
       {
         method: "POST",
         credentials: "include",

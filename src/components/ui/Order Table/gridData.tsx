@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import { GridCellParams, GridColDef } from "@mui/x-data-grid";
@@ -38,6 +39,11 @@ export function renderAvatar(
 
 export const columns: GridColDef[] = [
   {
+    field: "status",
+    headerName: "Status",
+    flex: 1.5,
+  },
+  {
     field: "productName",
     headerName: "Product Name",
     flex: 1.5,
@@ -51,7 +57,7 @@ export const columns: GridColDef[] = [
   },
   {
     field: "productPrice",
-    headerName: "Per Unit Price",
+    headerName: "Unit Price",
     headerAlign: "right",
     align: "right",
     flex: 1,
@@ -82,4 +88,59 @@ export const columns: GridColDef[] = [
   },
 ];
 
+export const newColumForAdmin: GridColDef[] = [
+  {
+    field: "orderBy",
+    headerName: "Customer Name",
+    flex: 1.5,
+  },
+  {
+    field: "customerEmail",
+    headerName: "Customer Email",
+    flex: 1.5,
+  },
+  {
+    field: "productName",
+    headerName: "Product Name",
+    flex: 1.5,
+    minWidth: 200,
+  },
+  {
+    field: "quantity",
+    headerName: "Quntity",
+    flex: 0.5,
+    minWidth: 80,
+  },
+  {
+    field: "productPrice",
+    headerName: "Unit Price",
+    headerAlign: "right",
+    align: "right",
+    flex: 1,
+    minWidth: 80,
+  },
+  {
+    field: "totalPrice",
+    headerName: "Total Price",
+    headerAlign: "right",
+    align: "right",
+    flex: 1,
+    minWidth: 100,
+  },
+  {
+    field: "payment",
+    headerName: "Payment Status",
+    headerAlign: "right",
+    align: "right",
+    flex: 1,
+    minWidth: 120,
+    renderCell: (params) => renderStatus(params.value as any),
+  },
+  {
+    field: "transaction",
+    headerName: "Transaction ID",
+    flex: 1,
+    minWidth: 150,
+  },
+];
 // export const rows : GridRowsProp = []

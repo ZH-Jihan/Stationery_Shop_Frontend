@@ -1,4 +1,5 @@
 
+import SeeAllOrderForAdmin from "@/pages/Dashbord/Admin/Order Management/SeeAllOrder";
 import AddProduct from "@/pages/Dashbord/Admin/Product Management/AddProduct";
 import SeeAllProduct from "@/pages/Dashbord/Admin/Product Management/SeeAllProduct";
 import UpdateProduct from "@/pages/Dashbord/Admin/Product Management/UpdateProduct";
@@ -43,6 +44,17 @@ export const adminPaths: TDesboardPath[] = [
       {
         path: "update-product/:productId",
         element: <UpdateProduct />,
+      },
+    ],
+  },
+  {
+    icon: <Product />,
+    name: "Order Management",
+    children: [
+      {
+        name: "All Order",
+        path: "allorders",
+        element: <SeeAllOrderForAdmin />,
       },
     ],
   },

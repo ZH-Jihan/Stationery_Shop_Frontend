@@ -6,6 +6,7 @@ import { TOrderTable } from "@/types/orderType";
 import { verifyToken } from "@/utils/verifyToken";
 import { DataGrid, GridRowsProp } from "@mui/x-data-grid";
 import { columns } from "../Order Table/gridData";
+import { newColumForAdmin } from "./gridData";
 
 export default function CustomizedDataGrid() {
   const products: TOrderTable[] = [];
@@ -16,8 +17,6 @@ export default function CustomizedDataGrid() {
   if (token) {
     user = verifyToken(token) as TUser;
   }
-  console.log(userOrder);
-
   if (user?.role === "admin") {
     allOrder?.map((order) => {
       const eachOrder: TOrderTable = {
@@ -51,18 +50,20 @@ export default function CustomizedDataGrid() {
       products.push(eachOrder);
     });
   }
+  console.log(columns);
+
   const rows: GridRowsProp = products;
   return (
     <DataGrid
       sx={{ width: "100%" }}
       checkboxSelection
       rows={rows}
-      columns={columns}
+      columns={user?.role === "admin" ? newColumForAdmin : columns}
       getRowClassName={(params) =>
         params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
       }
       initialState={{
-        pagination: { paginationModel: { pageSize: 20 } },
+        pagination: { paginationModel: { pageSize: 10 } },
       }}
       pageSizeOptions={[10, 20, 50]}
       disableColumnResize

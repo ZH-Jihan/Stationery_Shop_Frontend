@@ -1,5 +1,5 @@
 import Profile from "@/pages/Profile";
-import OrderListByUser from "@/pages/User/OrderListByUser";
+import OrderListByUser from "@/pages/Dashbord/User/OrderListByUser";
 
 export const userPath = [
   {
