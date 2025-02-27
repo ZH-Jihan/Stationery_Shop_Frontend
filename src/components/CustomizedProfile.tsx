@@ -1,11 +1,10 @@
-import { useGetAllOrdersQuery } from "@/redux/features/admin/orderManagementApi";
 import {
   logOut,
   TUser,
   useCurrentToken,
 } from "@/redux/features/auth/authSlice";
-import { useGetUserOrdersQuery } from "@/redux/features/order/orderApi";
 import { useAppSelector } from "@/redux/hooks";
+import { TOrder } from "@/types/orderType";
 import { getChartData, getOrderStats } from "@/utils/profileDashbord.utils";
 import { verifyToken } from "@/utils/verifyToken";
 import {
@@ -63,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CustomerDashboard = () => {
+const CustomizedProfile = ({ order }: { order: TOrder[] | undefined }) => {
   // This Functions is used for components style
   const classes = useStyles();
   const theme = useTheme();
@@ -74,11 +73,17 @@ const CustomerDashboard = () => {
   const token = useAppSelector(useCurrentToken);
   const user: TUser | null = token ? (verifyToken(token) as TUser) : null;
   // Fetch Order Data for using the information show
-  const { data: userOrder } = useGetUserOrdersQuery(undefined);
-  const { data: allOrder } = useGetAllOrdersQuery(undefined);
-  const totalOrder = user?.role === "admin" ? allOrder : userOrder;
+
+  const totalOrder = order;
+
   const stats = getOrderStats(totalOrder!);
   const chartData = getChartData(totalOrder!);
+
+  // Log Out Function
+  const handleLogOut = () => {
+    dispatch(logOut());
+    navigate("/");
+  };
 
   return (
     <div className={classes.root}>
@@ -102,10 +107,7 @@ const CustomerDashboard = () => {
               Privacy Settings
             </Button>*/}
             <Button
-              onClick={() => {
-                dispatch(logOut());
-                navigate("/");
-              }}
+              onClick={() => handleLogOut()}
               fullWidth
               color="error"
               variant="outlined"
@@ -199,29 +201,29 @@ const CustomerDashboard = () => {
 };
 
 // Sample props
-CustomerDashboard.defaultProps = {
-  userData: {
-    name: "Ethan Jones",
-    email: "ethan.jones@abc.com",
-  },
-  stats: {
-    "Total Orders": 10,
-    Wishlist: 20,
-    Credits: 100,
-    "Return Requests": 1,
-    Transactions: 50,
-    Delivered: 9,
-  },
-  orders: [
-    { id: 401, products: 1, status: "Completed", total: 50, date: "12/01" },
-    { id: 402, products: 1, status: "Pending", total: 80, date: "20/01" },
-  ],
-  chartData: [
-    { date: "Jan", amount: 50 },
-    { date: "Feb", amount: 80 },
-    { date: "Mar", amount: 120 },
-    { date: "Apr", amount: 90 },
-  ],
-};
+// CustomizedProfile.defaultProps = {
+//   userData: {
+//     name: "Ethan Jones",
+//     email: "ethan.jones@abc.com",
+//   },
+//   stats: {
+//     "Total Orders": 10,
+//     Wishlist: 20,
+//     Credits: 100,
+//     "Return Requests": 1,
+//     Transactions: 50,
+//     Delivered: 9,
+//   },
+//   orders: [
+//     { id: 401, products: 1, status: "Completed", total: 50, date: "12/01" },
+//     { id: 402, products: 1, status: "Pending", total: 80, date: "20/01" },
+//   ],
+//   chartData: [
+//     { date: "Jan", amount: 50 },
+//     { date: "Feb", amount: 80 },
+//     { date: "Mar", amount: 120 },
+//     { date: "Apr", amount: 90 },
+//   ],
+// };
 
-export default CustomerDashboard;
+export default CustomizedProfile;

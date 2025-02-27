@@ -1,8 +1,8 @@
-import SeeAllOrderForAdmin from "@/pages/Dashbord/Admin/Order Management/SeeAllOrder";
+import AdminProfile from "@/pages/Dashbord/Admin/AdminProfile";
+import SeeAllOrderForAdmin from "@/pages/Dashbord/Admin/Order Management/SeeAllOrderAdmin";
 import AddProduct from "@/pages/Dashbord/Admin/Product Management/AddProduct";
 import SeeAllProduct from "@/pages/Dashbord/Admin/Product Management/SeeAllProduct";
 import UpdateProduct from "@/pages/Dashbord/Admin/Product Management/UpdateProduct";
-import CustomerDashboard from "@/pages/Profile1";
 import Product from "@mui/icons-material/ManageHistoryTwoTone";
 import Profole from "@mui/icons-material/Person";
 import { ReactNode } from "react";
@@ -18,7 +18,7 @@ export const adminPaths: TDesboardPath[] = [
   {
     name: "Profile",
     path: "profile",
-    element: <CustomerDashboard />,
+    element: <AdminProfile />,
     icon: <Profole />,
   },
   {

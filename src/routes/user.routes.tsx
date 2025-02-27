@@ -1,11 +1,11 @@
 import OrderListByUser from "@/pages/Dashbord/User/OrderListByUser";
-import CustomerDashboard from "@/pages/Profile1";
+import UserProfile from "@/pages/Dashbord/User/UserProfile";
 
 export const userPath = [
   {
     name: "User Profile",
     path: "profile",
-    element: <CustomerDashboard />,
+    element: <UserProfile />,
   },
   {
     name: "Tracking Order",

@@ -1,5 +1,6 @@
 import SitemarkIcon from "@/components/SitemarkIcon";
 import { FacebookIcon, GoogleIcon } from "@/components/sing-in/CustomIcons";
+import { useSingUpMutation } from "@/redux/features/auth/authApi";
 import AppTheme from "@/theme/AppTheme";
 import ColorModeSelect from "@/theme/ColorModeSelect";
 import Box from "@mui/material/Box";
@@ -17,6 +18,8 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -69,30 +72,34 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState("");
 
+  const [singUp, { isError }] = useSingUpMutation();
+
   const validateInputs = () => {
-    // const email = document.getElementById("email") as HTMLInputElement;
-    // const password = document.getElementById("password") as HTMLInputElement;
+    const email = document.getElementById("email") as HTMLInputElement;
+    const password = document.getElementById("password") as HTMLInputElement;
     const name = document.getElementById("name") as HTMLInputElement;
 
     let isValid = true;
 
-    // if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-    //   setEmailError(true);
-    //   setEmailErrorMessage("Please enter a valid email address.");
-    //   isValid = false;
-    // } else {
-    //   setEmailError(false);
-    //   setEmailErrorMessage("");
-    // }
+    if (!email.value) {
+      // || !/\S+@\S+\.\S+/.test(email.value)
+      setEmailError(true);
+      setEmailErrorMessage("Please enter a valid email address.");
+      isValid = false;
+    } else {
+      setEmailError(false);
+      setEmailErrorMessage("");
+    }
 
-    // if (!password.value || password.value.length < 6) {
-    //   setPasswordError(true);
-    //   setPasswordErrorMessage("Password must be at least 6 characters long.");
-    //   isValid = false;
-    // } else {
-    //   setPasswordError(false);
-    //   setPasswordErrorMessage("");
-    // }
+    if (!password.value) {
+      // || password.value.length < 6
+      setPasswordError(true);
+      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      isValid = false;
+    } else {
+      setPasswordError(false);
+      setPasswordErrorMessage("");
+    }
 
     if (!name.value || name.value.length < 1) {
       setNameError(true);
@@ -105,19 +112,38 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
 
     return isValid;
   };
+  const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (nameError || emailError || passwordError) {
-      event.preventDefault();
       return;
     }
     const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get("name"),
-      lastName: data.get("lastName"),
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+
+    let toastId = toast.loading("Sing-Up in-progress...");
+    try {
+      const res = await singUp({
+        name: data.get("name"),
+        email: data.get("email"),
+        password: data.get("password"),
+      }).unwrap();
+
+      if (res.success === true) {
+        toastId = toast.success(res.message, { id: toastId });
+        navigate(`/login`);
+      }
+    } catch (error: any) {
+      if (error instanceof Error) {
+        toastId = toast.error(`Something went wrong: ${error?.message}`, {
+          id: toastId,
+        });
+      } else {
+        toast.error(`Something went wrong: ${error?.data?.message} `, {
+          id: toastId,
+        });
+      }
+    }
   };
 
   return (

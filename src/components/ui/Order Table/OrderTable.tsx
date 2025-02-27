@@ -1,56 +1,52 @@
-import { useGetAllOrdersQuery } from "@/redux/features/admin/orderManagementApi";
 import { TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
-import { useGetUserOrdersQuery } from "@/redux/features/order/orderApi";
 import { useAppSelector } from "@/redux/hooks";
-import { TOrderTable } from "@/types/orderType";
+import { TOrder, TOrderTable } from "@/types/orderType";
 import { verifyToken } from "@/utils/verifyToken";
 import { DataGrid, GridRowsProp } from "@mui/x-data-grid";
 import { columns } from "../Order Table/gridData";
 import { newColumForAdmin } from "./gridData";
 
-export default function CustomizedDataGrid() {
+export default function OrderTable({ order }: { order: TOrder[] | undefined }) {
   const products: TOrderTable[] = [];
-  const { data: userOrder } = useGetUserOrdersQuery(undefined);
-  const { data: allOrder } = useGetAllOrdersQuery(undefined);
+
   const token = useAppSelector(useCurrentToken);
   let user;
   if (token) {
     user = verifyToken(token) as TUser;
   }
   if (user?.role === "admin") {
-    allOrder?.map((order) => {
+    order?.map((order) => {
       const eachOrder: TOrderTable = {
         id: order?._id,
         productName: order?.product?.name,
         productPrice: order?.product?.price,
-        orderBy: order?.user.name,
-        customerEmail: order?.user.email,
-        quantity: order.quantity,
-        totalPrice: order.totalPrice,
-        orderDate: order.createdAt,
-        status: order.status,
-        payment: order.payment,
-        transaction: order.transaction ? order.transaction.id : null,
+        orderBy: order?.user?.name,
+        customerEmail: order?.user?.email,
+        quantity: order?.quantity,
+        totalPrice: order?.totalPrice,
+        orderDate: order?.createdAt,
+        status: order?.status,
+        payment: order?.payment,
+        transaction: order?.transaction ? order?.transaction?.id : null,
       };
       products.push(eachOrder);
     });
   } else {
-    userOrder?.map((order) => {
+    order?.map((order) => {
       const eachOrder: TOrderTable = {
         id: order?._id,
         productName: order?.product?.name,
         productPrice: order?.product?.price,
-        quantity: order.quantity,
-        totalPrice: order.totalPrice,
-        orderDate: order.createdAt,
-        status: order.status,
-        payment: order.payment,
-        transaction: order.transaction ? order.transaction.id : null,
+        quantity: order?.quantity,
+        totalPrice: order?.totalPrice,
+        orderDate: order?.createdAt,
+        status: order?.status,
+        payment: order?.payment,
+        transaction: order?.transaction ? order?.transaction?.id : null,
       };
       products.push(eachOrder);
     });
   }
-  console.log(columns);
 
   const rows: GridRowsProp = products;
   return (
