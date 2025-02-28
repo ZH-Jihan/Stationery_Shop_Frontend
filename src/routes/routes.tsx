@@ -3,6 +3,7 @@ import FDashboard from "@/components/layouts/Dashboard/FDashboard";
 import ProtectedRoute from "@/components/layouts/ProtectedRoute";
 import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SingUp";
+import UpdateProfileInfo from "@/pages/UpdateProfileInfo";
 import VerifyPage from "@/pages/VerifyPage";
 import { routeGenarator } from "@/utils/routesGeneroter";
 import { createBrowserRouter } from "react-router-dom";
@@ -37,6 +38,10 @@ export const route = createBrowserRouter([
   {
     path: "/orders/verify",
     element: <VerifyPage />,
+  },
+  {
+    path: "/profile/:userId",
+    element: <UpdateProfileInfo />,
   },
   {
     path: "/login",

@@ -100,10 +100,11 @@ const CheckOutPage = () => {
     try {
       await createOrder(data).unwrap();
     } catch (error) {
-      console.log(error);
       const typedError = error as TError;
       const errorMessage =
-        typedError?.errorSources?.[0]?.message || "Something went wrong";
+        typedError?.data?.errorSources?.[0]?.message || "Something went wrong";
+      console.log(errorMessage);
+
       toast.error(errorMessage);
     }
   };

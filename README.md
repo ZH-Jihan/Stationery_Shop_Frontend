@@ -1,50 +1,73 @@
-# React + TypeScript + Vite
+# Stationery Shop - MERN Stack Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack e-commerce platform for stationery products with secure user authentication, role-based access, and seamless product management.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### User Authentication & Authorization
+- **Secure Registration/Login**: Email & password-based auth with JWT
+- **Role-Based Access**: 
+  - `User` (Default): Browse products, manage cart, place orders
+  - `Admin` (Manual assignment): Manage users, products, and orders
+- **JWT Authentication**: Token stored in local storage for persistent sessions
 
-## Expanding the ESLint configuration
+### Public Routes
+- **Home Page**: 
+  - Featured products carousel
+  - Product categories showcase
+  - About section & testimonials
+- **Product Catalog**:
+  - Search by title/author/category
+  - Price range & availability filters
+  - Responsive product cards with quick view
+- **Product Details**: 
+  - High-resolution images
+  - Stock availability indicator
+  - Add to cart functionality
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### Private Routes
+- **Shopping Cart**:
+  - Real-time stock validation
+  - Order summary with total calculation
+  - Stripe/SurjoPay payment integration
+- **User Dashboard**:
+  - Order history tracking
+  - Profile management
+  - Address book
+- **Admin Dashboard**:
+  - CRUD operations for products
+  - User management system
+  - Order approval workflow (Pending → Shipping)
 
-- Configure the top-level `parserOptions` property like this:
+### UI/UX Highlights
+- 📱 Fully responsive design
+- 🎨 Clean & intuitive interface
+- ⚡ Loading states & smooth transitions
+- 🛑 User-friendly error handling
+- 💬 Action confirmation toasts
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Technologies Used
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Frontend
+- React.js + Vite
+- Redux Toolkit (State management)
+- React Router (Navigation)
+- Axios (API calls)
+- Tailwind CSS (Styling)
+- Heroicons (Icons)
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### Backend
+- Node.js + Express.js
+- MongoDB + Mongoose (ODM)
+- JSON Web Tokens (Authentication)
+- Bcrypt.js (Password hashing)
+- Stripe/SurjoPay SDK (Payments)
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## Installation
+
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/yourusername/stationery-shop.git
+   cd stationery-shop
+   npm install
+   npm run dev

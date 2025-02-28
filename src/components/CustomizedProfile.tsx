@@ -1,3 +1,4 @@
+import { useGetMeQuery } from "@/redux/features/auth/authApi";
 import {
   logOut,
   TUser,
@@ -76,6 +77,7 @@ const CustomizedProfile = ({ order }: { order: TOrder[] | undefined }) => {
 
   const totalOrder = order;
 
+  const { data: userData } = useGetMeQuery(undefined);
   const stats = getOrderStats(totalOrder!);
   const chartData = getChartData(totalOrder!);
 
@@ -84,6 +86,7 @@ const CustomizedProfile = ({ order }: { order: TOrder[] | undefined }) => {
     dispatch(logOut());
     navigate("/");
   };
+console.log(userData);
 
   return (
     <div className={classes.root}>
@@ -91,15 +94,24 @@ const CustomizedProfile = ({ order }: { order: TOrder[] | undefined }) => {
         {/* Left Sidebar */}
         <Grid item xs={12} md={3}>
           <Paper className={classes.statBox}>
-            <Avatar alt={user?.name} sx={{ width: 56, height: 56, mb: 2 }} />
+            <Avatar
+              alt={user?.name}
+              src={userData?.data?.image}
+              sx={{ width: 56, height: 56, mb: 2 }}
+            ></Avatar>
             <Typography variant="h6">{user?.name}</Typography>
             <Typography variant="body2" color="textSecondary">
               {user?.email}
             </Typography>
 
-            {/* <Button fullWidth variant="outlined" sx={{ mt: 2 }}>
-              Change Password
-            </Button> */}
+            <Button
+              onClick={() => navigate(`/profile/${user?._id}`)}
+              fullWidth
+              variant="outlined"
+              sx={{ mt: 2 }}
+            >
+              Update Profile Info
+            </Button>
             {/* <Button fullWidth variant="outlined" sx={{ mt: 1 }}>
               Newsletter
             </Button>
