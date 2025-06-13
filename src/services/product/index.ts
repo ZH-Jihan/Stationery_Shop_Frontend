@@ -1,5 +1,5 @@
 import config from "@/config";
-import { TAllProducts } from "@/interface/product";
+import { TAllProducts, TProduct } from "@/interface/product";
 
 export async function getAllProducts(): Promise<TAllProducts> {
   try {
@@ -25,11 +25,12 @@ export async function getAllProducts(): Promise<TAllProducts> {
   }
 }
 
-export async function getProductByID(id: string) {
+export async function getProductByID(id: string): Promise<TProduct> {
   const res = await fetch(`${config.dbUrl}/products/${id}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch product");
   }
-  return res.json();
+  const data = await res.json();
+  return data.data;
 }

@@ -63,7 +63,7 @@ const FutureProduct = () => {
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-primary">
         Featured Products
       </h2>
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
         {allProducts?.map((i: TProduct) => (
           <ProductCard key={i._id} product={i} />
         ))}

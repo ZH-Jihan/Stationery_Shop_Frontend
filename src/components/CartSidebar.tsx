@@ -82,10 +82,10 @@ export function CartSidebar() {
                   </Button>
                   <span className="ml-2">
                     x{" "}
-                    {item.price.toLocaleString("bn-BD", {
+                    {item.price.toLocaleString("en-US", {
                       style: "currency",
-                      currency: "BDT",
-                      minimumFractionDigits: 0,
+                      currency: "USD",
+                      minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
@@ -107,10 +107,10 @@ export function CartSidebar() {
             Subtotal:
           </span>
           <span className="text-lg font-bold text-pink-600">
-            {subtotal.toLocaleString("bn-BD", {
+            {subtotal.toLocaleString("en-US", {
               style: "currency",
-              currency: "BDT",
-              minimumFractionDigits: 0,
+              currency: "USD",
+              minimumFractionDigits: 2,
             })}
           </span>
         </div>

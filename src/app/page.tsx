@@ -1,128 +1,253 @@
 "use client";
 
-import { HomeCarousel } from "@/components/HomeCarousel";
-import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
+import { CountdownTimer } from "@/components/CountdownTimer";
+import { Newsletter } from "@/components/Newsletter";
+import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent, Star, Truck, Users } from "lucide-react";
-import dynamic from "next/dynamic";
+import { Card, CardContent } from "@/components/ui/card";
+import { TProduct } from "@/interface/product";
+import { getAllProducts } from "@/services/product";
+import { ChevronRight, Clock, Star, Truck } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
-const FutureProduct = dynamic(
-  () => import("@/components/app/home/FutureProduct"),
-  { ssr: false }
-);
+export default function HomePage() {
+  const [products, setProducts] = useState<TProduct[]>([]);
 
-function SaleBanner() {
-  return (
-    <section className="w-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-yellow-400 text-white py-6 sm:py-8 px-4 sm:px-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between shadow-lg mb-6 sm:mb-8 gap-4 animate-fade-in">
-      <div className="flex items-center gap-3 text-xl sm:text-2xl font-bold">
-        <BadgePercent className="w-7 h-7 sm:w-8 sm:h-8" />
-        Flash Sale! Up to <span className="text-yellow-200">70% OFF</span>
-      </div>
-      <Button
-        className="bg-white text-pink-600 font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow hover:bg-pink-100 transition text-sm sm:text-base"
-        size="lg"
-        suppressHydrationWarning
-      >
-        Shop Now <ArrowRight className="ml-2 w-5 h-5" />
-      </Button>
-    </section>
-  );
-}
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getAllProducts();
+        setProducts(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
 
-function Categories() {
-  const cats = [
-    { name: "Electronics", icon: <Star className="w-6 h-6" /> },
-    { name: "Fashion", icon: <Users className="w-6 h-6" /> },
-    { name: "Home", icon: <Truck className="w-6 h-6" /> },
-    { name: "Beauty", icon: <BadgePercent className="w-6 h-6" /> },
+    fetchProducts();
+  }, []);
+
+  const featuredProducts = products.slice(0, 8);
+  const newArrivals = products.slice(0, 4);
+
+  const categories = [
+    {
+      name: "Electronics",
+      image:
+        "https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=2070",
+      count: 120,
+    },
+    {
+      name: "Fashion",
+      image:
+        "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2071",
+      count: 85,
+    },
+    {
+      name: "Home & Living",
+      image:
+        "https://images.unsplash.com/photo-1484101403633-562f891dc89a?q=80&w=2074",
+      count: 65,
+    },
+    {
+      name: "Beauty",
+      image:
+        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=2080",
+      count: 45,
+    },
   ];
-  return (
-    <section className="w-full mb-6 sm:mb-8">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-primary">
-        Shop by Category
-      </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-        {cats.map((cat) => (
-          <div
-            key={cat.name}
-            className="bg-muted rounded-2xl p-5 sm:p-8 flex flex-col items-center gap-2 font-semibold shadow hover:scale-105 hover:bg-primary/10 transition-transform cursor-pointer border border-transparent hover:border-primary"
-          >
-            <div className="mb-2 text-primary">{cat.icon}</div>
-            {cat.name}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
-function FlashSale() {
+  const features = [
+    {
+      icon: <Truck className="w-6 h-6" />,
+      title: "Free Shipping",
+      description: "On orders over $50",
+    },
+    {
+      icon: <Clock className="w-6 h-6" />,
+      title: "24/7 Support",
+      description: "Dedicated support",
+    },
+    {
+      icon: <Star className="w-6 h-6" />,
+      title: "Best Quality",
+      description: "Premium products",
+    },
+  ];
+
+  // Set flash sale end time to 24 hours from now
+  const flashSaleEndTime = new Date(Date.now() + 72 * 60 * 60 * 1000);
+
   return (
-    <section className="w-full mb-6 sm:mb-8">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-yellow-600 dark:text-yellow-400">
-        Flash Sale
-      </h2>
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="bg-yellow-100 dark:bg-yellow-900 rounded-2xl p-5 sm:p-6 shadow-lg flex flex-col items-center border border-yellow-200 dark:border-yellow-800 hover:scale-105 transition-transform"
-          >
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-200 dark:bg-yellow-700 rounded-xl mb-2 flex items-center justify-center">
-              <BadgePercent className="w-7 h-7 sm:w-8 sm:h-8 text-yellow-700 dark:text-yellow-200" />
+    <main className="flex-1">
+      {/* Hero Section */}
+      <section className="relative h-[600px] bg-gradient-to-r from-primary/10 to-primary/5">
+        <div className="container mx-auto px-4 h-full flex items-center">
+          <div className="max-w-xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Discover Amazing Products
+            </h1>
+            <p className="text-lg text-muted-foreground mb-8">
+              Shop the latest trends in fashion, electronics, and more. Find
+              great deals on top brands.
+            </p>
+            <div className="flex gap-4">
+              <Button size="lg" asChild>
+                <Link href="/products">Shop Now</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/categories">Browse Categories</Link>
+              </Button>
             </div>
-            <span className="font-semibold mb-1 text-sm sm:text-base">
-              Sale Product {i}
-            </span>
-            <span className="text-yellow-700 font-bold mb-2 text-sm sm:text-base">
-              $49.99
-            </span>
-            <Button className="w-full text-xs sm:text-base" variant="outline">
-              Buy Now
-            </Button>
           </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function Newsletter() {
-  return (
-    <section className="w-full mb-6 sm:mb-8">
-      <div className="bg-gradient-to-r from-primary to-pink-500 text-white rounded-2xl p-5 sm:p-8 flex flex-col items-center shadow-lg">
-        <h2 className="text-xl sm:text-2xl font-bold mb-2">
-          Subscribe to our Newsletter
-        </h2>
-        <form className="flex flex-col sm:flex-row gap-2 w-full max-w-md">
-          <input
-            type="email"
-            placeholder="Your email"
-            className="flex-1 rounded px-3 py-2 text-black text-sm sm:text-base"
+        </div>
+        <div className="absolute right-0 top-0 w-1/2 h-full hidden lg:block">
+          <Image
+            src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070"
+            alt="Hero Banner"
+            fill
+            className="object-cover"
+            priority
           />
-          <Button
-            type="submit"
-            className="bg-white text-primary font-semibold px-4 sm:px-6 py-2 rounded shadow hover:bg-gray-100 text-sm sm:text-base"
-          >
-            Subscribe
-          </Button>
-        </form>
-      </div>
-    </section>
-  );
-}
+        </div>
+      </section>
 
-export default function Home() {
-  return (
-    <div className="container mx-auto px-2 sm:px-4 py-8 sm:py-12 flex flex-col gap-6 sm:gap-8 animate-fade-in">
-      {/* <LandingCarousel /> */}
-      <SaleBanner />
-      <HomeCarousel />
-      <Categories />
-      <FutureProduct />
-      <FlashSale />
-      <TestimonialsCarousel />
+      {/* Categories Section */}
+      <section className="py-16 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">Shop by Category</h2>
+            <Link
+              href="/categories"
+              className="text-primary hover:underline flex items-center gap-1"
+            >
+              View All <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {categories.map((category) => (
+              <Link
+                key={category.name}
+                href={`/products?category=${category.name}`}
+                className="group"
+              >
+                <Card className="overflow-hidden">
+                  <CardContent className="p-0 relative aspect-square">
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                      <h3 className="text-xl font-semibold mb-1">
+                        {category.name}
+                      </h3>
+                      <p className="text-sm">{category.count} Products</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">Featured Products</h2>
+            <Link
+              href="/products"
+              className="text-primary hover:underline flex items-center gap-1"
+            >
+              View All <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Flash Sale Section */}
+      <section className="py-16 bg-primary/5">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Flash Sale</h2>
+              <p className="text-muted-foreground">
+                Limited time offers. Don&apos;t miss out!
+              </p>
+            </div>
+            <CountdownTimer
+              endTime={flashSaleEndTime}
+              onComplete={() => {
+                // Handle flash sale completion
+                console.log("Flash sale ended!");
+              }}
+            />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
+              <Card key={product._id} className="group">
+                <ProductCard key={product._id} product={product} />
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* New Arrivals Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">New Arrivals</h2>
+            <Link
+              href="/products?sort=newest"
+              className="text-primary hover:underline flex items-center gap-1"
+            >
+              View All <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {newArrivals.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="flex items-center gap-4 p-6 bg-background rounded-lg"
+              >
+                <div className="text-primary">{feature.icon}</div>
+                <div>
+                  <h3 className="font-semibold mb-1">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
       <Newsletter />
-    </div>
+    </main>
   );
 }

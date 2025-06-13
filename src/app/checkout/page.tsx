@@ -65,7 +65,7 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (paymentMethod === "cod") {
-      console.log(paymentMethod,cartItems,formData)
+      console.log(paymentMethod, cartItems, formData);
       // Handle Cash on Delivery
       console.log("Processing Cash on Delivery order");
     } else {
@@ -106,28 +106,57 @@ export default function CheckoutPage() {
                   </p>
                 </div>
                 <p className="font-medium">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  {(item.price * item.quantity).toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 2,
+                  })}
                 </p>
               </div>
             ))}
             <div className="border-t pt-4">
               <div className="flex justify-between mb-2">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>
+                  {subtotal.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
               </div>
               <div className="flex justify-between mb-2">
                 <span>Shipping</span>
-                <span>${shippingCost.toFixed(2)}</span>
+                <span>
+                  {shippingCost.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between mb-2 text-green-600">
                   <span>Discount</span>
-                  <span>-${discount.toFixed(2)}</span>
+                  <span>
+                    -
+                    {discount.toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>
+                  {total.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
               </div>
             </div>
           </div>

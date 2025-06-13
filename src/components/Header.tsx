@@ -2,12 +2,6 @@
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -15,28 +9,72 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  LucideMenu,
+  ChevronDown,
   Menu,
   Moon,
+  Search,
   ShoppingCart,
   Sun,
   User,
   X,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
-import Link from "next/link";
 
 const navItems = [
   {
     label: "Shop",
-    dropdown: ["All Products", "New Arrivals", "Best Sellers", "Categories"],
+    href: "/products",
+    dropdown: [
+      { label: "All Products", href: "/products" },
+      { label: "New Arrivals", href: "/products?sort=newest" },
+      { label: "Best Sellers", href: "/products?sort=featured" },
+      { label: "Categories", href: "/categories" },
+    ],
   },
-  { label: "Deals", dropdown: ["Flash Sale", "Coupons", "Clearance"] },
-  { label: "Brands", dropdown: ["Top Brands", "New Brands"] },
-  { label: "About", dropdown: ["Our Story", "Careers", "Contact"] },
-  { label: "Support", dropdown: ["Help Center", "Returns", "Shipping"] },
+  {
+    label: "Categories",
+    href: "/categories",
+    dropdown: [
+      { label: "Electronics", href: "/products?category=Electronics" },
+      { label: "Fashion", href: "/products?category=Fashion" },
+      { label: "Home & Living", href: "/products?category=Home" },
+      { label: "Beauty", href: "/products?category=Beauty" },
+      { label: "Sports", href: "/products?category=Sports" },
+      { label: "Books", href: "/products?category=Books" },
+      { label: "Toys", href: "/products?category=Toys" },
+    ],
+  },
+  {
+    label: "Deals",
+    href: "/deals",
+    dropdown: [
+      { label: "Flash Sale", href: "/deals/flash-sale" },
+      { label: "Clearance", href: "/deals/clearance" },
+      { label: "Special Offers", href: "/deals/special-offers" },
+    ],
+  },
+  {
+    label: "Brands",
+    href: "/brands",
+    dropdown: [
+      { label: "Apple", href: "/products?brand=Apple" },
+      { label: "Samsung", href: "/products?brand=Samsung" },
+      { label: "Sony", href: "/products?brand=Sony" },
+      { label: "LG", href: "/products?brand=LG" },
+      { label: "Nike", href: "/products?brand=Nike" },
+      { label: "Adidas", href: "/products?brand=Adidas" },
+    ],
+  },
+];
+
+const userMenuItems = [
+  { label: "My Account", href: "/account" },
+  { label: "Orders", href: "/orders" },
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Settings", href: "/settings" },
 ];
 
 export function Header() {
@@ -46,62 +84,99 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { cartItems, toggleCart } = useCart();
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (search.trim()) {
+      window.location.href = `/products?search=${encodeURIComponent(
+        search.trim()
+      )}`;
+    }
+  };
 
   return (
     <header
       className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b border-border shadow-sm"
       suppressHydrationWarning
     >
-      <div className="container mx-auto flex items-center justify-between py-3 px-4 gap-4">
+      <div className="container mx-auto flex items-center justify-between py-2 px-2 sm:py-3 sm:px-4 gap-2 sm:gap-4">
         {/* Logo */}
         <Link
           href="/"
-          className="font-bold text-2xl tracking-tight text-primary"
+          className="font-bold text-xl sm:text-2xl tracking-tight text-primary"
         >
           e-comarze
         </Link>
+
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-2">
           {navItems.map((item) => (
-            <DropdownMenu key={item.label}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="font-medium text-base flex items-center gap-1"
-                  suppressHydrationWarning
-                >
-                  {item.label}
-                  <LucideMenu className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {item.dropdown.map((sub) => (
-                  <DropdownMenuItem key={sub}>{sub}</DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div
+              key={item.label}
+              className="relative"
+              onMouseEnter={() => setOpenDropdown(item.label)}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <Button
+                variant="ghost"
+                className="font-medium text-base flex items-center gap-1 group relative"
+                suppressHydrationWarning
+              >
+                {item.label}
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    openDropdown === item.label ? "rotate-180" : ""
+                  }`}
+                />
+              </Button>
+              {openDropdown === item.label && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-background border rounded-md shadow-lg py-1 z-50">
+                  {item.dropdown.map((subItem) => (
+                    <Link
+                      key={subItem.label}
+                      href={subItem.href}
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted cursor-pointer"
+                    >
+                      {subItem.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
-        {/* Desktop Search Bar */}
-        <div className="flex-1 max-w-md mx-4 hidden md:block">
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-            className="w-full rounded-md border px-3 py-2 bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            suppressHydrationWarning
-          />
-        </div>
-        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-2">
+
+        {/* Search Bar */}
+        <form
+          onSubmit={handleSearch}
+          className="hidden md:flex flex-1 max-w-md mx-4"
+        >
+          <div className="relative w-full">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-md border px-3 py-2 bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              suppressHydrationWarning
+            />
+            <button
+              type="submit"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+
+        {/* Right-side actions */}
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            aria-label="Toggle dark mode"
+            aria-label="Toggle theme"
             suppressHydrationWarning
           >
             {theme === "dark" ? (
@@ -110,124 +185,71 @@ export function Header() {
               <Moon className="w-5 h-5" />
             )}
           </Button>
+
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleCart}
-            aria-label="Cart"
-            suppressHydrationWarning
+            aria-label="Shopping cart"
+            className="relative"
           >
             <ShoppingCart className="w-5 h-5" />
-            <span className="ml-1 text-sm font-medium">
-              ({cartItems.length})
-            </span>
+            {cartItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+
+          {/* User Menu */}
+          {user ? (
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown("user")}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
               <Button
                 variant="ghost"
                 size="icon"
+                className="relative group"
                 aria-label="User menu"
-                suppressHydrationWarning
               >
                 <User className="w-5 h-5" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {user ? (
-                <>
-                  <div className="px-3 py-2 text-xs text-muted-foreground">
-                    <div className="font-semibold">
-                      {user.name || user.email}
-                    </div>
-                    <div className="capitalize">{user.role}</div>
-                  </div>
-                  <DropdownMenuItem asChild>
-                    <Link href={user.role ==="admin" ? "/admin/dashboard" : "/user/dashboard"}>Dashboard</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
+              {openDropdown === "user" && (
+                <div className="absolute top-full right-0 mt-1 w-48 bg-background border rounded-md shadow-lg py-1 z-50">
+                  {userMenuItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={`/${user.role}${item.href}`}
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted cursor-pointer"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <button
                     onClick={() => signOut({ callbackUrl: "/" })}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-muted cursor-pointer"
                   >
                     Sign Out
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/signin">Sign In</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/signup">Sign Up</Link>
-                  </DropdownMenuItem>
-                </>
+                  </button>
+                </div>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        {/* Mobile Hamburger, Cart, and User icons */}
-        <div className="md:hidden flex items-center gap-2">
-          <button
-            onClick={toggleCart}
-            aria-label="Cart"
-            className="inline-flex items-center justify-center p-2 rounded-full hover:bg-muted transition"
-            suppressHydrationWarning
-          >
-            <ShoppingCart className="w-5 h-5" />
-            <span className="ml-1 text-sm font-medium">
-              ({cartItems.length})
-            </span>
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <span
-                className="inline-flex items-center justify-center p-2 rounded-full hover:bg-muted transition cursor-pointer"
-                suppressHydrationWarning
-              >
-                <User className="w-5 h-5" />
-              </span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {user ? (
-                <>
-                  <div className="px-3 py-2 text-xs text-muted-foreground">
-                    <div className="font-semibold">
-                      {user.name || user.email}
-                    </div>
-                    <div className="capitalize">{user.role}</div>
-                  </div>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
-                  {user.role === "admin" && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin">Admin</Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                  >
-                    Sign Out
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/signin">Sign In</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/auth/signup">Sign Up</Link>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </div>
+          ) : (
+            <Button variant="outline" asChild>
+              <Link href="/auth/signin">Sign In</Link>
+            </Button>
+          )}
+
+          {/* Mobile menu button */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
+                className="md:hidden"
                 aria-label="Open menu"
-                suppressHydrationWarning
               >
                 <Menu className="w-6 h-6" />
               </Button>
@@ -248,114 +270,89 @@ export function Header() {
                   size="icon"
                   onClick={() => setOpen(false)}
                   aria-label="Close menu"
-                  suppressHydrationWarning
                 >
                   <X className="w-6 h-6" />
                 </Button>
               </SheetHeader>
-              <div className="flex flex-col gap-2 px-4 py-4">
-                {/* Search Bar */}
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  autoComplete="off"
-                  spellCheck={false}
-                  className="w-full rounded-md border px-3 py-2 bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-4"
-                  suppressHydrationWarning
-                />
-                {/* Nav Buttons with Dropdowns */}
+
+              {/* Mobile Search */}
+              <form onSubmit={handleSearch} className="p-4 border-b">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-md border px-3 py-2 bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
+
+              {/* Mobile Navigation */}
+              <div className="p-4 space-y-4">
                 {navItems.map((item) => (
-                  <div key={item.label} className="mb-2">
-                    <div className="font-semibold text-base flex items-center gap-1 mb-1">
+                  <div key={item.label}>
+                    <Link
+                      href={item.href}
+                      className="font-semibold text-base block mb-2"
+                      onClick={() => setOpen(false)}
+                    >
                       {item.label}
-                    </div>
-                    <div className="flex flex-col gap-1 pl-3">
-                      {item.dropdown.map((sub) => (
+                    </Link>
+                    <div className="pl-4 space-y-2">
+                      {item.dropdown.map((subItem) => (
                         <Link
-                          key={sub}
-                          href="#"
-                          className="text-sm text-muted-foreground hover:text-primary transition"
+                          key={subItem.label}
+                          href={subItem.href}
+                          className="text-sm text-muted-foreground hover:text-primary block"
                           onClick={() => setOpen(false)}
                         >
-                          {sub}
+                          {subItem.label}
                         </Link>
                       ))}
                     </div>
                   </div>
                 ))}
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" className="flex-1" asChild>
-                    <Link href="/cart" onClick={() => setOpen(false)}>
-                      Cart
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={toggleTheme}
-                    suppressHydrationWarning
-                  >
-                    {theme === "dark" ? (
-                      <Sun className="w-5 h-5" />
-                    ) : (
-                      <Moon className="w-5 h-5" />
-                    )}
-                  </Button>
-                </div>
-                <div className="mt-4 border-t pt-4">
-                  {user ? (
-                    <>
-                      <div className="font-semibold mb-2">
-                        {user.name || user.email}
-                      </div>
-                      <div className="capitalize text-xs mb-2">{user.role}</div>
-                      <Button variant="ghost" className="w-full mb-2" asChild>
-                        <Link href="/dashboard" onClick={() => setOpen(false)}>
-                          Dashboard
+
+                {/* Mobile User Menu */}
+                {user ? (
+                  <div className="pt-4 border-t">
+                    <h3 className="font-semibold mb-2">Account</h3>
+                    <div className="pl-4 space-y-2">
+                      {userMenuItems.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={`/${user.role}${item.href}`}
+                          className="text-sm text-muted-foreground hover:text-primary block"
+                          onClick={() => setOpen(false)}
+                        >
+                          {item.label}
                         </Link>
-                      </Button>
-                      {user.role === "admin" && (
-                        <Button variant="ghost" className="w-full mb-2" asChild>
-                          <Link href="/admin" onClick={() => setOpen(false)}>
-                            Admin
-                          </Link>
-                        </Button>
-                      )}
-                      <Button
-                        variant="destructive"
-                        className="w-full"
+                      ))}
+                      <button
                         onClick={() => {
                           signOut({ callbackUrl: "/" });
                           setOpen(false);
                         }}
-                        suppressHydrationWarning
+                        className="text-sm text-red-600 hover:text-red-700 block w-full text-left"
                       >
                         Sign Out
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="ghost" className="w-full mb-2" asChild>
-                        <Link
-                          href="/auth/signin"
-                          onClick={() => setOpen(false)}
-                        >
-                          Sign In
-                        </Link>
-                      </Button>
-                      <Button variant="ghost" className="w-full" asChild>
-                        <Link
-                          href="/auth/signup"
-                          onClick={() => setOpen(false)}
-                        >
-                          Sign Up
-                        </Link>
-                      </Button>
-                    </>
-                  )}
-                </div>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button className="w-full" asChild>
+                    <Link href="/auth/signin" onClick={() => setOpen(false)}>
+                      Sign In
+                    </Link>
+                  </Button>
+                )}
               </div>
             </SheetContent>
           </Sheet>

@@ -12,7 +12,10 @@ const TableSection = () => {
     <div className="mt-12">
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav
+          className="-mb-px flex flex-wrap justify-center sm:justify-start gap-x-4 sm:space-x-8"
+          aria-label="Tabs"
+        >
           <button
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === "specification"

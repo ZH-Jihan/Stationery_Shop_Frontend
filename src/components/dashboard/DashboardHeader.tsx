@@ -50,12 +50,12 @@ export function DashboardHeader({
       </Button>
 
       {/* Breadcrumbs (for desktop) */}
-      <div className="hidden md:flex flex-col">
+      {/* <div className="hidden md:flex flex-col">
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          / Dashboard
+          {pathname}
         </span>
         <h1 className="text-lg font-semibold">Dashboard</h1>
-      </div>
+      </div> */}
 
       {/* Search Input */}
       <div className="relative flex-1 mx-4 max-w-md">

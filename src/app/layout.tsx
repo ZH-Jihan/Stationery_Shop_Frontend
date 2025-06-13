@@ -4,6 +4,7 @@ import { ConditionalLayoutComponents } from "@/components/ConditionalLayoutCompo
 import { CartProvider } from "@/context/CartContext";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,6 +41,8 @@ export default function RootLayout({
           </AppProviders>
           <ClientCartWrapper />
         </CartProvider>
+        {/* Toast Notifications */}
+        <Toaster position="top-center" />
       </body>
     </html>
   );

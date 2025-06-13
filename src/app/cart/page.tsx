@@ -97,7 +97,13 @@ export default function CartPage() {
             <h2 className="text-lg font-bold mb-2">Order Summary</h2>
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>
+                {subtotal.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                  minimumFractionDigits: 2,
+                })}
+              </span>
             </div>
             <form
               className="flex gap-2 mb-2"
@@ -116,7 +122,13 @@ export default function CartPage() {
             </form>
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>
+                {subtotal.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                  minimumFractionDigits: 2,
+                })}
+              </span>
             </div>
             <Button className="w-full mt-4">Checkout</Button>
           </div>

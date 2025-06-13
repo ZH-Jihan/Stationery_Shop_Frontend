@@ -1,12 +1,10 @@
 import { cn } from "@/lib/utils";
 import {
-  ChevronRight,
-  Cuboid,
   LayoutDashboard,
   Rocket,
+  ShoppingBasket,
   Table,
   User,
-  Wallet,
   X,
 } from "lucide-react";
 import { Session } from "next-auth";
@@ -17,6 +15,16 @@ interface SidebarProps {
   setIsOpen: (isOpen: boolean) => void;
   session: Session;
 }
+
+const userNav = [
+  { icon: ShoppingBasket, label: "Orders", href: "/user/orders" },
+];
+
+const adminNav = [
+  { icon: ShoppingBasket, label: "All Orders", href: "/admin/orders" },
+  { icon: Table, label: "Products", href: "/admin/products/view" },
+  { icon: Table, label: "Create Item", href: "/admin/products/create" },
+];
 
 export function Sidebar({ isOpen, setIsOpen, session }: SidebarProps) {
   return (
@@ -51,19 +59,38 @@ export function Sidebar({ isOpen, setIsOpen, session }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 overflow-y-auto py-4">
         <SidebarLink
           icon={LayoutDashboard}
           label="Dashboard"
           href={
-            session?.user.role === "admin"
+            session?.user?.role === "admin"
               ? "/admin/dashboard"
               : "/user/dashboard"
           }
-          active={true}
           isOpen={isOpen}
         />
-        <SidebarLink icon={Table} label="Tables" href="#" isOpen={isOpen} />
+        {session?.user?.role === "admin"
+          ? adminNav?.map((nav) => (
+              <SidebarLink
+                key={nav.label}
+                icon={nav.icon}
+                label={nav.label}
+                href={nav.href}
+                isOpen={isOpen}
+              />
+            ))
+          : userNav?.map((nav) => (
+              <SidebarLink
+                key={nav.label}
+                icon={nav.icon}
+                label={nav.label}
+                href={nav.href}
+                isOpen={isOpen}
+              />
+            ))}
+
+        {/* <SidebarLink icon={Table} label="Tables" href="#" isOpen={isOpen} />
         <SidebarLink icon={Wallet} label="Billing" href="#" isOpen={isOpen} />
         <SidebarLink
           icon={Cuboid}
@@ -71,7 +98,7 @@ export function Sidebar({ isOpen, setIsOpen, session }: SidebarProps) {
           href="#"
           isOpen={isOpen}
         />
-        <SidebarLink icon={ChevronRight} label="RTL" href="#" isOpen={isOpen} />
+        <SidebarLink icon={ChevronRight} label="RTL" href="#" isOpen={isOpen} /> */}
 
         <div className="pt-4 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
           {isOpen && "Account Pages"}
