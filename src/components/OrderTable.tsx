@@ -45,16 +45,16 @@ const OrderTable = ({ orders, showUserColumn = false }: OrderTableProps) => {
               </td>
               {showUserColumn && (
                 <td className="px-4 py-3 whitespace-nowrap break-words">
-                  {order.user ? order.user.email : "N/A"}
+                  {order.user?.email || "N/A"}
                 </td>
               )}
               {showUserColumn && (
                 <td className="px-4 py-3 whitespace-nowrap break-words">
-                  {order.shippingAddress.phone}
+                  {order.shippingAddress?.phone || "N/A"}
                 </td>
               )}
               <td className="px-4 py-3 whitespace-nowrap">
-                {order.totalPrice.toFixed(2)}{" "}
+                ${order.totalPrice.toFixed(2)}{" "}
                 {order.payment.transaction?.currency || ""}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">
@@ -72,7 +72,7 @@ const OrderTable = ({ orders, showUserColumn = false }: OrderTableProps) => {
                 )}
               </td>
               <td className="px-4 py-3 whitespace-nowrap break-words">
-                {order.payment.transaction?.id || ""}
+                {order.payment.transaction?.id || "N/A"}
               </td>
             </tr>
           ))}

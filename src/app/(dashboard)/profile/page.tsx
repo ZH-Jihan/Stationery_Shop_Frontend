@@ -43,8 +43,15 @@ export default function ProfilePage() {
           const data = await getUserProfile();
           setUserProfile(data.data);
           setFormData(data.data);
-          if (data.data.image) {
+          if (
+            data.data.image &&
+            data.data.image !== "" &&
+            data.data.image !== "Unknown"
+          ) {
             setImagePreview(data.data.image);
+          } else {
+            setImagePreview(null);
+            setFormData((prev) => ({ ...prev, image: "" }));
           }
         } catch (err) {
           console.error("Failed to fetch user profile:", err);
@@ -87,8 +94,8 @@ export default function ProfilePage() {
       };
       reader.readAsDataURL(file);
     } else {
-      setImagePreview(userProfile?.image || null);
-      setFormData((prev) => ({ ...prev, image: userProfile?.image || "" }));
+      setImagePreview(null);
+      setFormData((prev) => ({ ...prev, image: "" }));
     }
   };
 

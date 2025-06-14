@@ -5,7 +5,7 @@ import type { CartItem } from "@/context/CartContext";
 import { useCart } from "@/context/CartContext";
 import { createOrder, type OrderData } from "@/services/order";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface FormData {
@@ -17,7 +17,7 @@ interface FormData {
   country: string;
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const { cartItems, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "sslcommerz">(
@@ -452,5 +452,22 @@ export default function CheckoutPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-lg">Loading checkout...</p>
+          </div>
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

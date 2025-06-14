@@ -89,7 +89,7 @@ export default function HomePage() {
   return (
     <main className="flex-1">
       {/* Hero Section */}
-      <section className="relative h-[600px] bg-gradient-to-r from-primary/10 to-primary/5">
+      <section className="relative h-[350px] bg-gradient-to-r from-primary/10 to-primary/5">
         <div className="container mx-auto px-4 h-full flex items-center">
           <div className="max-w-xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">

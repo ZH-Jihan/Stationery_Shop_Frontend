@@ -1,9 +1,12 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
-export function CartSidebar() {
+function CartContent() {
   const {
     isCartOpen,
     cartItems,
@@ -177,5 +180,24 @@ export function CartSidebar() {
         </Button>
       </div>
     </div>
+  );
+}
+
+export function CartSidebar() {
+  return (
+    <Suspense
+      fallback={
+        <div className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 shadow-lg">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-lg">Loading cart...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <CartContent />
+    </Suspense>
   );
 }

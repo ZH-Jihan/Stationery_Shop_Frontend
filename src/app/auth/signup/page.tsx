@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { regeister } from "@/services/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export default function SignUpPage() {
+function SignUpContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -30,48 +30,65 @@ export default function SignUpPage() {
     setLoading(false);
   };
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center py-12">
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">Sign In</h1>
+    <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow p-8">
+      <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
 
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded px-3 py-2 border"
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded px-3 py-2 border"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="rounded px-3 py-2 border"
-            required
-          />
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Register..." : "Sign Up"}
-          </Button>
-        </form>
-        <div className="my-4 text-center text-muted-foreground">or</div>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Your Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="rounded px-3 py-2 border"
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="rounded px-3 py-2 border"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="rounded px-3 py-2 border"
+          required
+        />
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Register..." : "Sign Up"}
+        </Button>
+      </form>
+      <div className="my-4 text-center text-muted-foreground">or</div>
 
-        <div className="flex justify-between mt-4 text-sm">
-          You already have account ?
-          <Link href="/auth/signin" className="underline">
-            SignIn
-          </Link>
-        </div>
+      <div className="flex justify-between mt-4 text-sm">
+        You already have account ?
+        <Link href="/auth/signin" className="underline">
+          SignIn
+        </Link>
       </div>
+    </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center py-12">
+      <Suspense
+        fallback={
+          <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-lg">Loading...</p>
+            </div>
+          </div>
+        }
+      >
+        <SignUpContent />
+      </Suspense>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import React from "react";
-import { authOptions } from "../api/auth/[...nextauth]/route";
 
 export default async function Layout({
   children,
@@ -10,7 +10,11 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
-  if (!session) redirect("/auth/signin");
+
+  if (!session?.user) {
+    redirect("/auth/signin");
+  }
+
   if (session.user.role !== "user") {
     return <div className="p-8 text-center">Unauthorized</div>;
   }

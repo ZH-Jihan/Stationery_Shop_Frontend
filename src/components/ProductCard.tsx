@@ -20,11 +20,11 @@ export function ProductCard({ product }: { product: TProduct }) {
       <div className="relative aspect-square overflow-hidden">
         <Link href={`/products/${product._id}`}>
           {/* Discount Badge */}
-          {product.saveAmount && product.discountPercentage && (
+          {/* {product.saveAmount && product.discountPercentage && (
             <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
               {product.discountPercentage}% OFF
             </div>
-          )}
+          )} */}
 
           {/* Wishlist Button */}
           <button
@@ -37,7 +37,7 @@ export function ProductCard({ product }: { product: TProduct }) {
           {/* Product Image */}
           <div className="relative w-full h-full">
             <Image
-              src={product.image[0]}
+              src={product?.image[0]}
               alt={product.name || "product image"}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -99,7 +99,7 @@ export function ProductCard({ product }: { product: TProduct }) {
                 minimumFractionDigits: 2,
               })}
             </span>
-            {product.saveAmount && product.saveAmount > 0 && (
+            {/* {product.saveAmount && product.saveAmount > 0 && (
               <span className="text-sm text-gray-500 line-through">
                 {(product.price + product.saveAmount).toLocaleString("en-US", {
                   style: "currency",
@@ -107,7 +107,7 @@ export function ProductCard({ product }: { product: TProduct }) {
                   minimumFractionDigits: 2,
                 })}
               </span>
-            )}
+            )} */}
           </div>
         </Link>
       </div>

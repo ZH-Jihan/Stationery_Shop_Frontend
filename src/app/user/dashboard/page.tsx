@@ -3,7 +3,7 @@ import { SalesChart } from "@/components/dashboard/SalesChart";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { UsersChart } from "@/components/dashboard/UsersChart";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { DollarSign, ShoppingCart, Trophy, Users } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
 

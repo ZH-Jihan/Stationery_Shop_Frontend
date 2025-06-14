@@ -6,47 +6,71 @@ import { useCart } from "@/context/CartContext";
 import { TProduct } from "@/interface/product";
 import { getProductByID } from "@/services/product";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
 
-const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
+function ProductDetailsContent() {
+  const params = useParams();
+  const productId = params?.id as string;
   const router = useRouter();
   const { addToCart } = useCart();
   const [product, setProduct] = useState<TProduct | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
-  const params = use(props.params);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    async function fetchProduct() {
+      setIsLoading(true);
       try {
-        const data = await getProductByID(params.id);
+        const data = await getProductByID(productId);
         setProduct(data);
       } catch (error) {
         console.error("Error fetching product:", error);
+        toast.error("Failed to load product details");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
-    };
+    }
 
-    fetchProduct();
-  }, [params.id]);
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]);
 
   const handleQuantityChange = (value: number) => {
     setQuantity(Math.max(1, value));
   };
 
-  const handleAddToCart = () => {
-    if (product) {
-      addToCart(product, quantity);
+  const handleAddToCart = async () => {
+    if (!product) return;
+    setIsAddingToCart(true);
+    try {
+      await addToCart(product, quantity);
+      toast.success("Added to cart successfully");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add to cart");
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
-  const handleBuyNow = () => {
-    if (product) {
+  const handleBuyNow = async () => {
+    if (!product) return;
+    setIsAddingToCart(true);
+    try {
       addToCart(product, quantity);
+      toast.success("Added to cart successfully");
+      // Redirect to checkout
       router.push("/checkout");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add to cart");
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
@@ -58,19 +82,12 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gray-200 dark:bg-gray-700 h-96 rounded-lg"></div>
-            <div className="space-y-4">
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-            </div>
-          </div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-lg">Loading product...</p>
         </div>
       </div>
     );
@@ -78,11 +95,21 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
 
   if (!product) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-red-600">Product not found</h1>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Product Not Found</h2>
+          <p className="text-muted-foreground">
+            The product you&apos;re looking for doesn&apos;t exist or has been
+            removed.
+          </p>
+        </div>
       </div>
     );
   }
+
+  const discountedPrice = product.discountPercentage
+    ? product.price * (1 - product.discountPercentage / 100)
+    : product.price;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -138,14 +165,12 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
           </h1>
           <div className="text-gray-800 dark:text-gray-200 mb-4">
             <span className="text-pink-600 dark:text-pink-400 text-2xl font-semibold mr-2">
-              {formatPrice(product.price)}
+              {formatPrice(discountedPrice)}
             </span>
             {product.discountPercentage && product.discountPercentage > 0 && (
               <>
                 <span className="text-gray-500 dark:text-gray-400 line-through mr-4">
-                  {formatPrice(
-                    product.price * (1 + product.discountPercentage / 100)
-                  )}
+                  {formatPrice(product.price)}
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">
                   Save: {product.discountPercentage}%
@@ -232,24 +257,40 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
                 className="bg-blue-600 hover:bg-blue-700"
                 disabled={!product.inStock}
               >
-                Add to Cart
+                {isAddingToCart ? "Adding..." : "Add to Cart"}
               </Button>
               <Button
                 onClick={handleBuyNow}
-                className="bg-green-600 hover:bg-green-700"
-                disabled={!product.inStock}
+                disabled={isAddingToCart}
+                variant="default"
+                className="flex-1"
               >
-                Buy Now
+                {isAddingToCart ? "Processing..." : "Buy Now"}
               </Button>
             </div>
           </div>
         </div>
       </div>
-
       {/* Tabs Section */}
       <TableSection product={product} />
     </div>
   );
-};
-
-export default ProductDetailsPage;
+}
+export default function ProductDetailsPage() {
+  return (
+    <main className="min-h-screen bg-background">
+      <Suspense
+        fallback={
+          <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-lg">Loading product...</p>
+            </div>
+          </div>
+        }
+      >
+        <ProductDetailsContent />
+      </Suspense>
+    </main>
+  );
+}

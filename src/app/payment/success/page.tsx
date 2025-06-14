@@ -8,7 +8,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FaCheckCircle, FaDownload, FaPrint } from "react-icons/fa";
 import { toast } from "sonner";
 
@@ -47,18 +47,16 @@ interface PaymentSuccessProps {
   };
 }
 
-const PaymentSuccess = () => {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [order, setOrder] = useState<PaymentSuccessProps["order"] | null>(null);
   const [loading, setLoading] = useState(true);
-  console.log(searchParams);
 
   useEffect(() => {
     const verifyOrder = async () => {
       try {
         const tran_id = searchParams.get("tran_id");
-        console.log("Transaction ID:", tran_id);
 
         if (!tran_id) {
           console.error("No transaction ID found in URL");
@@ -68,7 +66,6 @@ const PaymentSuccess = () => {
         }
 
         const response = await verifyPayment(tran_id);
-        console.log("Payment verification response:", response);
 
         if (response?.data) {
           setOrder(response.data);
@@ -92,9 +89,6 @@ const PaymentSuccess = () => {
 
     // Create new PDF document
     const doc = new jsPDF();
-
-    // Add company logo (if you have one)
-    // doc.addImage(logo, 'PNG', 10, 10, 30, 30);
 
     // Add header
     doc.setFontSize(20);
@@ -178,111 +172,17 @@ const PaymentSuccess = () => {
 
   const handlePrintInvoice = () => {
     if (!order) return;
-
-    // Create new PDF document
-    const doc = new jsPDF();
-
-    // Add header
-    doc.setFontSize(20);
-    doc.text("INVOICE", 105, 20, { align: "center" });
-
-    doc.setFontSize(12);
-    doc.text(`Order #${order._id}`, 105, 30, { align: "center" });
-    doc.text(`Date: ${format(new Date(order.createdAt), "PPP")}`, 105, 40, {
-      align: "center",
-    });
-
-    // Add shipping address
-    doc.setFontSize(12);
-    doc.text("Shipping Address:", 20, 60);
-    doc.setFontSize(10);
-    doc.text(order.shippingAddress.fullName, 20, 70);
-    doc.text(order.shippingAddress.address, 20, 75);
-    doc.text(
-      `${order.shippingAddress.city}, ${order.shippingAddress.postalCode}`,
-      20,
-      80
-    );
-    doc.text(order.shippingAddress.country, 20, 85);
-    doc.text(`Phone: ${order.shippingAddress.phone}`, 20, 90);
-
-    // Add items table
-    const tableData = order.items.map((item) => [
-      item.product.name,
-      item.quantity.toString(),
-      `${item.price.toFixed(2)} ${order.payment.transaction.currency}`,
-      `${(item.price * item.quantity).toFixed(2)} ${
-        order.payment.transaction.currency
-      }`,
-    ]);
-
-    autoTable(doc, {
-      startY: 100,
-      head: [["Item", "Quantity", "Price", "Total"]],
-      body: tableData,
-      theme: "grid",
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [41, 128, 185] },
-    });
-
-    // Add payment details
-    const finalY =
-      (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable
-        .finalY || 150;
-    doc.setFontSize(12);
-    doc.text("Payment Details:", 20, finalY + 10);
-    doc.setFontSize(10);
-    doc.text(
-      `Total Amount: ${order.totalPrice.toFixed(2)} ${
-        order.payment.transaction.currency
-      }`,
-      20,
-      finalY + 20
-    );
-    doc.text(
-      `Payment Method: ${order.payment.method.toUpperCase()}`,
-      20,
-      finalY + 25
-    );
-    doc.text(
-      `Transaction ID: ${order.payment.transaction.id}`,
-      20,
-      finalY + 30
-    );
-    doc.text(
-      `Payment Date: ${format(
-        new Date(order.payment.transaction.paidAt),
-        "PPP"
-      )}`,
-      20,
-      finalY + 35
-    );
-
-    // Open PDF in new window for printing
-    const pdfWindow = window.open("", "_blank");
-    if (pdfWindow) {
-      pdfWindow.document.write(`
-        <html>
-          <head>
-            <title>Print Invoice</title>
-            <style>
-              body { margin: 0; }
-              iframe { width: 100%; height: 100vh; border: none; }
-            </style>
-          </head>
-          <body>
-            <iframe src="${doc.output("datauristring")}"></iframe>
-          </body>
-        </html>
-      `);
-      pdfWindow.document.close();
-    }
+    handleDownloadInvoice();
+    window.print();
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-lg">Verifying payment...</p>
+        </div>
       </div>
     );
   }
@@ -417,30 +317,41 @@ const PaymentSuccess = () => {
                 </div>
               </div>
             </div>
-
-            <div className="flex justify-center space-x-4">
-              <Button
-                onClick={handleDownloadInvoice}
-                className="flex items-center space-x-2"
-                variant="outline"
-              >
-                <FaDownload className="h-5 w-5" />
-                <span>Download Invoice</span>
-              </Button>
-              <Button
-                onClick={handlePrintInvoice}
-                className="flex items-center space-x-2"
-                variant="outline"
-              >
-                <FaPrint className="h-5 w-5" />
-                <span>Print Invoice</span>
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-center gap-4">
+            <Button
+              onClick={handleDownloadInvoice}
+              className="flex items-center gap-2"
+            >
+              <FaDownload /> Download Invoice
+            </Button>
+            <Button
+              onClick={handlePrintInvoice}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <FaPrint /> Print Invoice
+            </Button>
           </div>
         </Card>
       </div>
     </div>
   );
-};
+}
 
-export default PaymentSuccess;
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-lg">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
+  );
+}

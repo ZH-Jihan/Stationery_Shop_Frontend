@@ -44,4 +44,6 @@ export interface TProduct {
   specifications: string[];
   warranty: string;
   isDeleted?: boolean;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
