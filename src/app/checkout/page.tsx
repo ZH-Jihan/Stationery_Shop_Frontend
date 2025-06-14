@@ -3,8 +3,10 @@
 import { Button } from "@/components/ui/button";
 import type { CartItem } from "@/context/CartContext";
 import { useCart } from "@/context/CartContext";
+import { createOrder, type OrderData } from "@/services/order";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface FormData {
   fullName: string;
@@ -17,10 +19,13 @@ interface FormData {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartItems } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const { cartItems, clearCart } = useCart();
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "sslcommerz">(
+    "cod"
+  );
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   const shippingCost = 5; // Fixed shipping cost
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
@@ -36,7 +41,7 @@ export default function CheckoutPage() {
     const submitButtonText = document.getElementById("submitButtonText");
     if (submitButtonText) {
       submitButtonText.textContent =
-        paymentMethod === "cod" ? "Confirm Order" : "Proceed to Purchase";
+        paymentMethod === "cod" ? "Confirm Order" : "Proceed to Payment";
     }
   }, [paymentMethod]);
 
@@ -44,10 +49,10 @@ export default function CheckoutPage() {
     // Placeholder for coupon logic
     if (couponCode === "DISCOUNT10") {
       setDiscount(subtotal * 0.1); // 10% discount
-      alert("Coupon applied successfully!");
+      toast.success("Coupon applied successfully!");
     } else {
       setDiscount(0);
-      alert("Invalid coupon code.");
+      toast.error("Invalid coupon code.");
     }
   };
 
@@ -59,18 +64,71 @@ export default function CheckoutPage() {
   const handlePaymentMethodChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setPaymentMethod(e.target.value);
+    setPaymentMethod(e.target.value as "cod" | "sslcommerz");
   };
+  const subtotal = cartItems.reduce((total: number, item: CartItem) => {
+    const itemPrice =
+      item.flashSale && item.flashSalePrice ? item.flashSalePrice : item.price;
+    return total + itemPrice * item.quantity;
+  }, 0);
+
+  const originalSubtotal = cartItems.reduce((total: number, item: CartItem) => {
+    return total + item.price * item.quantity;
+  }, 0);
+
+  const totalDiscount = originalSubtotal - subtotal;
+
+  const total = subtotal - discount + shippingCost;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (paymentMethod === "cod") {
-      console.log(paymentMethod, cartItems, formData);
-      // Handle Cash on Delivery
-      console.log("Processing Cash on Delivery order");
-    } else {
-      // Handle SSLCommerz payment
-      console.log("Processing SSLCommerz payment");
+    setIsProcessing(true);
+
+    try {
+      // Validate form data
+      if (
+        !formData.fullName ||
+        !formData.phone ||
+        !formData.address ||
+        !formData.city ||
+        !formData.postalCode ||
+        !formData.country
+      ) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
+      // Create order data with all cart items
+      const orderData: OrderData = {
+        items: cartItems.map((item) => ({
+          product: item._id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        totalPrice: total,
+        paymentMethod,
+        shippingAddress: formData,
+      };
+      const res = await createOrder(orderData);
+      console.log(res);
+
+      if (!res.data.url) {
+        // For cash on delivery, clear cart and redirect to success page
+        clearCart();
+        toast.success("Order placed successfully!");
+        // router.push("/order-success");
+      } else {
+        if (res.data?.url) {
+          window.location.href = res.data.url;
+        } else {
+          throw new Error("Payment URL not received");
+        }
+      }
+    } catch (error) {
+      console.error("Error processing order:", error);
+      toast.error("Failed to process order. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -82,12 +140,6 @@ export default function CheckoutPage() {
       </div>
     );
   }
-
-  const subtotal = cartItems.reduce((total: number, item: CartItem) => {
-    return total + item.price * item.quantity;
-  }, 0);
-
-  const total = subtotal - discount + shippingCost;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -105,16 +157,63 @@ export default function CheckoutPage() {
                     Quantity: {item.quantity}
                   </p>
                 </div>
-                <p className="font-medium">
-                  {(item.price * item.quantity).toLocaleString("en-US", {
+                <div className="text-right">
+                  {item.flashSale && item.flashSalePrice ? (
+                    <>
+                      <p className="font-medium text-red-600">
+                        {(item.flashSalePrice * item.quantity).toLocaleString(
+                          "en-US",
+                          {
+                            style: "currency",
+                            currency: "USD",
+                            minimumFractionDigits: 2,
+                          }
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-500 line-through">
+                        {(item.price * item.quantity).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                          minimumFractionDigits: 2,
+                        })}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="font-medium">
+                      {(item.price * item.quantity).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+            <div className="space-y-2 mt-4">
+              <div className="flex justify-between mb-2">
+                <span>Original Price</span>
+                <span>
+                  {originalSubtotal.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                     minimumFractionDigits: 2,
                   })}
-                </p>
+                </span>
               </div>
-            ))}
-            <div className="border-t pt-4">
+              {totalDiscount > 0 && (
+                <div className="flex justify-between mb-2 text-green-600">
+                  <span>Flash Sale Savings</span>
+                  <span>
+                    -
+                    {totalDiscount.toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between mb-2">
                 <span>Subtotal</span>
                 <span>
@@ -137,7 +236,7 @@ export default function CheckoutPage() {
               </div>
               {discount > 0 && (
                 <div className="flex justify-between mb-2 text-green-600">
-                  <span>Discount</span>
+                  <span>Coupon Discount</span>
                   <span>
                     -
                     {discount.toLocaleString("en-US", {
@@ -343,9 +442,12 @@ export default function CheckoutPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors"
+            disabled={isProcessing}
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
-            <span id="submitButtonText">Confirm Order</span>
+            <span id="submitButtonText">
+              {isProcessing ? "Processing..." : "Confirm Order"}
+            </span>
           </button>
         </form>
       </div>

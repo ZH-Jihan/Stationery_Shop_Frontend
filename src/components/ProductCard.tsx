@@ -37,7 +37,7 @@ export function ProductCard({ product }: { product: TProduct }) {
           {/* Product Image */}
           <div className="relative w-full h-full">
             <Image
-              src={product.image}
+              src={product.image[0]}
               alt={product.name || "product image"}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

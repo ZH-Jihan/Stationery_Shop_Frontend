@@ -6,9 +6,9 @@ export function Footer() {
     <footer className="bg-background border-t border-border py-8 mt-12">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4">
         <div className="flex flex-col gap-2 items-center md:items-start">
-          <span className="font-bold text-lg">e-comarze</span>
+          <span className="font-bold text-lg">AuraShop</span>
           <span className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} e-comarze. All rights reserved.
+            &copy; {new Date().getFullYear()} AuraShop. All rights reserved.
           </span>
         </div>
         <nav className="flex gap-6 text-muted-foreground">

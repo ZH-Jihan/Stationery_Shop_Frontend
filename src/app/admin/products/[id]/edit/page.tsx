@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -12,10 +11,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { TProduct } from "@/interface/product";
-import { createProduct } from "@/services/product";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { getProductByID } from "@/services/product";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const CATEGORY_OPTIONS = [
@@ -32,27 +30,11 @@ const CATEGORY_OPTIONS = [
   "Other",
 ];
 
-// Add this helper function at the top of the file, after imports
-const formatDateForInput = (date: Date | string | null): string => {
-  if (!date) return "";
-  const d = new Date(date);
-  return d.toISOString().split("T")[0]; // Format: YYYY-MM-DD
-};
-
-const formatDateForBackend = (dateString: string): string => {
-  if (!dateString) return "";
-  // Set time to 12:00 PM
-  const date = new Date(dateString);
-  date.setHours(12, 0, 0, 0);
-  return date.toISOString();
-};
-
-// Define the form state type
 interface ProductFormState {
   name: string;
   brand: string;
   price: string;
-  image: File[];
+  image: File[] | string[];
   category: string;
   description: string;
   quantity: string;
@@ -69,29 +51,70 @@ interface ProductFormState {
   isDeleted: boolean;
 }
 
-export default function ProductCreatePage() {
-  const router = useRouter();
+interface ProductFormErrors {
+  name?: string;
+  brand?: string;
+  price?: string;
+  image?: string;
+  category?: string;
+  description?: string;
+  quantity?: string;
+  warranty?: string;
+  flashSalePrice?: string;
+  flashSaleEndTime?: string;
+}
+
+export default function ProductEditPage() {
+  const params = useParams();
+  const productId = params?.id as string;
+
+  const [form, setForm] = useState<ProductFormState | null>(null);
+  const [errors, setErrors] = useState<ProductFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState<ProductFormState>({
-    name: "",
-    brand: "",
-    price: "",
-    image: [],
-    category: "",
-    description: "",
-    quantity: "",
-    inStock: true,
-    discountPercentage: "0",
-    flashSale: false,
-    flashSalePrice: "0",
-    flashSaleEndTime: "",
-    isFeatured: false,
-    isNew: false,
-    keyFeatures: [""],
-    specifications: [""],
-    warranty: "",
-    isDeleted: false,
-  } as ProductFormState);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch product data by ID
+  useEffect(() => {
+    async function fetchProduct() {
+      setIsLoading(true);
+      try {
+        // TODO: Replace with your actual API call
+        const res = await getProductByID(productId);
+        const p = res;
+        setForm({
+          name: p.name || "",
+          brand: p.brand || "",
+          price: String(p.price ?? ""),
+          image: p.image || [],
+          category: p.category || "",
+          description: p.description || "",
+          quantity: String(p.quantity ?? ""),
+          inStock: p.inStock ?? true,
+          discountPercentage: String(p.discountPercentage ?? "0"),
+          flashSale: p.flashSale ?? false,
+          flashSalePrice: String(p.flashSalePrice ?? "0"),
+          flashSaleEndTime: p.flashSaleEndTime
+            ? new Date(p.flashSaleEndTime).toISOString().slice(0, 16)
+            : "",
+          isFeatured: p.isFeatured ?? false,
+          isNew: p.isNew ?? false,
+          keyFeatures:
+            p.keyFeatures && p.keyFeatures.length > 0 ? p.keyFeatures : [""],
+          specifications:
+            p.specifications && p.specifications.length > 0
+              ? p.specifications
+              : [""],
+          warranty: p.warranty || "",
+          isDeleted: p.isDeleted ?? false,
+        });
+      } catch (err) {
+        toast.error("Failed to load product");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (productId) fetchProduct();
+  }, [productId]);
 
   // Dynamic fields handlers
   const handleArrayChange = (
@@ -99,23 +122,28 @@ export default function ProductCreatePage() {
     idx: number,
     value: string
   ) => {
+    if (!form) return;
     setForm((prev) => {
+      if (!prev) return prev;
       const arr = [...(prev[field] as string[])];
       arr[idx] = value;
       return { ...prev, [field]: arr };
     });
   };
   const addArrayField = (field: "keyFeatures" | "specifications") => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: [...(prev[field] as string[]), ""],
-    }));
+    if (!form) return;
+    setForm((prev) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: [...(prev[field] as string[]), ""] };
+    });
   };
   const removeArrayField = (
     field: "keyFeatures" | "specifications",
     idx: number
   ) => {
+    if (!form) return;
     setForm((prev) => {
+      if (!prev) return prev;
       const arr = [...(prev[field] as string[])];
       arr.splice(idx, 1);
       return { ...prev, [field]: arr };
@@ -125,67 +153,60 @@ export default function ProductCreatePage() {
   // Image upload handler (multiple)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setForm((prev) => ({ ...prev, image: files }));
+    setForm((prev) => (prev ? { ...prev, image: files } : prev));
   };
 
   // Form submit handler
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!form) return;
     setIsSubmitting(true);
-
-    try {
-      // Convert form data to match TProduct interface
-      const productData = {
-        name: form.name,
-        brand: form.brand,
-        price: Number(form.price),
-        category: form.category as TProduct["category"],
-        description: form.description,
-        quantity: Number(form.quantity),
-        inStock: form.inStock,
-        discountPercentage: Number(form.discountPercentage),
-        flashSale: form.flashSale,
-        flashSalePrice: Number(form.flashSalePrice),
-        flashSaleEndTime: form.flashSaleEndTime
-          ? formatDateForBackend(form.flashSaleEndTime)
-          : undefined,
-        isFeatured: form.isFeatured,
-        isNew: form.isNew,
-        keyFeatures: form.keyFeatures.filter(
-          (feature) => feature.trim() !== ""
-        ),
-        specifications: form.specifications.filter(
-          (spec) => spec.trim() !== ""
-        ),
-        warranty: form.warranty,
-        isDeleted: form.isDeleted,
-      };
-
-      // Convert File[] to actual File objects
-      const imageFiles = form.image.map((file) => {
-        if (file instanceof File) return file;
-        // If it's a string (URL), create a File object from it
-        return new File([], file);
-      });
-
-      await createProduct(productData as TProduct, imageFiles);
-      toast.success("Product created successfully");
-      router.push("/admin/products/view"); // Redirect to products list
-    } catch (error) {
-      console.error("Error creating product:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create product"
-      );
-    } finally {
+    setErrors({});
+    // Basic validation
+    const newErrors: ProductFormErrors = {};
+    if (!form.name) newErrors.name = "Product name is required";
+    if (!form.brand) newErrors.brand = "Brand is required";
+    if (!form.price || isNaN(Number(form.price)))
+      newErrors.price = "Valid price is required";
+    if (!form.category) newErrors.category = "Category is required";
+    if (!form.description) newErrors.description = "Description is required";
+    if (!form.quantity || isNaN(Number(form.quantity)))
+      newErrors.quantity = "Valid quantity is required";
+    if (!form.warranty) newErrors.warranty = "Warranty is required";
+    if (form.image.length === 0)
+      newErrors.image = "At least one image is required";
+    if (
+      form.flashSale &&
+      (!form.flashSalePrice || isNaN(Number(form.flashSalePrice)))
+    )
+      newErrors.flashSalePrice = "Valid flash sale price is required";
+    if (form.flashSale && !form.flashSaleEndTime)
+      newErrors.flashSaleEndTime = "Flash sale end time is required";
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
       setIsSubmitting(false);
+      return;
     }
+    // TODO: Submit to API
+    toast.success("Product updated successfully (mock)");
+    setIsSubmitting(false);
+    // Optionally redirect
+    // router.push('/admin/products');
   };
+
+  if (isLoading || !form) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-background px-2 py-8">
+        <div className="text-lg text-muted-foreground">Loading product...</div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-background px-2 py-8">
       <div className="w-full max-w-5xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl p-4 sm:p-8 md:p-12 mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-          Create New Product
+          Update Product
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -194,18 +215,24 @@ export default function ProductCreatePage() {
               <Input
                 value={form.name}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, name: e.target.value }))
+                  setForm((f) => (f ? { ...f, name: e.target.value } : f))
                 }
               />
+              {errors.name && (
+                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+              )}
             </div>
             <div>
               <label className="font-medium mb-1 block">Brand *</label>
               <Input
                 value={form.brand}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, brand: e.target.value }))
+                  setForm((f) => (f ? { ...f, brand: e.target.value } : f))
                 }
               />
+              {errors.brand && (
+                <p className="text-red-500 text-xs mt-1">{errors.brand}</p>
+              )}
             </div>
             <div>
               <label className="font-medium mb-1 block">Price ($) *</label>
@@ -213,9 +240,12 @@ export default function ProductCreatePage() {
                 type="number"
                 value={form.price}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, price: e.target.value }))
+                  setForm((f) => (f ? { ...f, price: e.target.value } : f))
                 }
               />
+              {errors.price && (
+                <p className="text-red-500 text-xs mt-1">{errors.price}</p>
+              )}
             </div>
             <div>
               <label className="font-medium mb-1 block">Quantity *</label>
@@ -223,16 +253,19 @@ export default function ProductCreatePage() {
                 type="number"
                 value={form.quantity}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, quantity: e.target.value }))
+                  setForm((f) => (f ? { ...f, quantity: e.target.value } : f))
                 }
               />
+              {errors.quantity && (
+                <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>
+              )}
             </div>
             <div>
               <label className="font-medium mb-1 block">Category *</label>
               <Select
                 value={form.category}
                 onValueChange={(val) =>
-                  setForm((f) => ({ ...f, category: val }))
+                  setForm((f) => (f ? { ...f, category: val } : f))
                 }
               >
                 <SelectTrigger>
@@ -246,15 +279,21 @@ export default function ProductCreatePage() {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.category && (
+                <p className="text-red-500 text-xs mt-1">{errors.category}</p>
+              )}
             </div>
             <div>
               <label className="font-medium mb-1 block">Warranty *</label>
               <Input
                 value={form.warranty}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, warranty: e.target.value }))
+                  setForm((f) => (f ? { ...f, warranty: e.target.value } : f))
                 }
               />
+              {errors.warranty && (
+                <p className="text-red-500 text-xs mt-1">{errors.warranty}</p>
+              )}
             </div>
           </div>
           <div>
@@ -262,10 +301,13 @@ export default function ProductCreatePage() {
             <Textarea
               value={form.description}
               onChange={(e) =>
-                setForm((f) => ({ ...f, description: e.target.value }))
+                setForm((f) => (f ? { ...f, description: e.target.value } : f))
               }
               rows={3}
             />
+            {errors.description && (
+              <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+            )}
           </div>
           <div>
             <label className="font-medium mb-1 block">Images *</label>
@@ -275,14 +317,17 @@ export default function ProductCreatePage() {
               accept="image/*"
               onChange={handleImageChange}
             />
+            {errors.image && (
+              <p className="text-red-500 text-xs mt-1">{errors.image}</p>
+            )}
             {form.image.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {form.image.map((file, idx) => (
+                {(form.image as (File | string)[]).map((file, idx) => (
                   <span
                     key={idx}
                     className="text-xs bg-muted px-2 py-1 rounded"
                   >
-                    {file instanceof File ? file.name : String(file)}
+                    {typeof file === "string" ? file : file.name}
                   </span>
                 ))}
               </div>
@@ -293,7 +338,7 @@ export default function ProductCreatePage() {
               <Switch
                 checked={form.inStock}
                 onCheckedChange={(val) =>
-                  setForm((f) => ({ ...f, inStock: val }))
+                  setForm((f) => (f ? { ...f, inStock: val } : f))
                 }
               />
               <span>In Stock</span>
@@ -302,7 +347,7 @@ export default function ProductCreatePage() {
               <Switch
                 checked={form.isFeatured}
                 onCheckedChange={(val) =>
-                  setForm((f) => ({ ...f, isFeatured: val }))
+                  setForm((f) => (f ? { ...f, isFeatured: val } : f))
                 }
               />
               <span>Featured</span>
@@ -311,7 +356,7 @@ export default function ProductCreatePage() {
               <Switch
                 checked={form.isNew}
                 onCheckedChange={(val) =>
-                  setForm((f) => ({ ...f, isNew: val }))
+                  setForm((f) => (f ? { ...f, isNew: val } : f))
                 }
               />
               <span>New Arrival</span>
@@ -320,7 +365,7 @@ export default function ProductCreatePage() {
               <Switch
                 checked={form.isDeleted}
                 onCheckedChange={(val) =>
-                  setForm((f) => ({ ...f, isDeleted: val }))
+                  setForm((f) => (f ? { ...f, isDeleted: val } : f))
                 }
               />
               <span>Deleted</span>
@@ -333,7 +378,9 @@ export default function ProductCreatePage() {
                 type="number"
                 value={form.discountPercentage}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, discountPercentage: e.target.value }))
+                  setForm((f) =>
+                    f ? { ...f, discountPercentage: e.target.value } : f
+                  )
                 }
               />
             </div>
@@ -341,7 +388,7 @@ export default function ProductCreatePage() {
               <Switch
                 checked={form.flashSale}
                 onCheckedChange={(val) =>
-                  setForm((f) => ({ ...f, flashSale: val }))
+                  setForm((f) => (f ? { ...f, flashSale: val } : f))
                 }
               />
               <span>Flash Sale</span>
@@ -357,33 +404,35 @@ export default function ProductCreatePage() {
                   type="number"
                   value={form.flashSalePrice}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, flashSalePrice: e.target.value }))
+                    setForm((f) =>
+                      f ? { ...f, flashSalePrice: e.target.value } : f
+                    )
                   }
                 />
+                {errors.flashSalePrice && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.flashSalePrice}
+                  </p>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="flashSaleEndTime">Flash Sale End Date</Label>
+              <div>
+                <label className="font-medium mb-1 block">
+                  Flash Sale End Time
+                </label>
                 <Input
-                  type="date"
-                  id="flashSaleEndTime"
+                  type="datetime-local"
                   value={form.flashSaleEndTime}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setForm((f) => ({ ...f, flashSaleEndTime: value }));
-                  }}
-                  min={formatDateForInput(new Date())}
-                  disabled={!form.flashSale}
-                  onKeyDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    const input = e.target as HTMLInputElement;
-                    input.showPicker();
-                  }}
-                  style={{ cursor: "pointer" }}
+                  onChange={(e) =>
+                    setForm((f) =>
+                      f ? { ...f, flashSaleEndTime: e.target.value } : f
+                    )
+                  }
                 />
-                <p className="text-sm text-gray-500">
-                  Click to select the date when the flash sale should end (time
-                  will be set to 12:00 PM)
-                </p>
+                {errors.flashSaleEndTime && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.flashSaleEndTime}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -448,7 +497,7 @@ export default function ProductCreatePage() {
             className="w-full h-12 text-base font-semibold"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Creating..." : "Create Product"}
+            {isSubmitting ? "Saving..." : "Update Product"}
           </Button>
         </form>
       </div>

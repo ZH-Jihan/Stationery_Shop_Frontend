@@ -15,10 +15,18 @@ export function CartSidebar() {
   } = useCart();
   const router = useRouter();
 
-  const subtotal = cartItems.reduce(
+  const subtotal = cartItems.reduce((acc, item) => {
+    const itemPrice =
+      item.flashSale && item.flashSalePrice ? item.flashSalePrice : item.price;
+    return acc + itemPrice * item.quantity;
+  }, 0);
+
+  const originalSubtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
+
+  const totalDiscount = originalSubtotal - subtotal;
 
   const handleProceedToCheckout = () => {
     toggleCart(); // Close the cart sidebar
@@ -52,7 +60,7 @@ export function CartSidebar() {
           cartItems.map((item) => (
             <div key={item._id} className="flex items-center space-x-4 mb-4">
               <Image
-                src={item.image}
+                src={item.image[0]}
                 alt={item.name}
                 width={60}
                 height={60}
@@ -80,14 +88,34 @@ export function CartSidebar() {
                   >
                     +
                   </Button>
-                  <span className="ml-2">
-                    x{" "}
-                    {item.price.toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                      minimumFractionDigits: 2,
-                    })}
-                  </span>
+                  <div className="ml-2">
+                    {item.flashSale && item.flashSalePrice ? (
+                      <>
+                        <span className="text-red-600">
+                          {item.flashSalePrice.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                        <span className="line-through text-gray-500 ml-1">
+                          {item.price.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </>
+                    ) : (
+                      <span>
+                        {item.price.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <Button
@@ -102,19 +130,46 @@ export function CartSidebar() {
         )}
       </div>
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-lg font-semibold text-gray-900 dark:text-white">
-            Subtotal:
-          </span>
-          <span className="text-lg font-bold text-pink-600">
-            {subtotal.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-              minimumFractionDigits: 2,
-            })}
-          </span>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">
+              Original Price:
+            </span>
+            <span className="text-gray-600 dark:text-gray-400">
+              {originalSubtotal.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+                minimumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+          {totalDiscount > 0 && (
+            <div className="flex justify-between items-center text-green-600">
+              <span>Total Savings:</span>
+              <span>
+                -
+                {totalDiscount.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">
+              Subtotal:
+            </span>
+            <span className="text-lg font-bold text-pink-600">
+              {subtotal.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+                minimumFractionDigits: 2,
+              })}
+            </span>
+          </div>
         </div>
-        <Button className="w-full mb-2" onClick={handleProceedToCheckout}>
+        <Button className="w-full mb-2 mt-4" onClick={handleProceedToCheckout}>
           Proceed to Checkout
         </Button>
         <Button variant="outline" className="w-full" onClick={clearCart}>

@@ -15,6 +15,7 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
   const [product, setProduct] = useState<TProduct | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(0);
   const params = use(props.params);
 
   useEffect(() => {
@@ -85,24 +86,48 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumbs Placeholder */}
+      {/* Breadcrumbs */}
       <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
         Home &gt; {product.category} &gt; {product.name}
       </div>
 
-      {/* Main content area - adjust grid/flex for responsiveness */}
+      {/* Main content area */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Left column: Product Image Gallery */}
         <div>
-          <div className="bg-gray-200 dark:bg-gray-700 h-96 flex items-center justify-center rounded-lg">
+          <div className="bg-gray-200 dark:bg-gray-700 h-96 flex items-center justify-center rounded-lg mb-4">
             <Image
-              src={product.image}
+              src={product.image[selectedImage]}
               alt={product.name}
               width={400}
               height={400}
               className="max-h-full max-w-full object-contain"
             />
           </div>
+          {/* Thumbnail Gallery */}
+          {product.image.length > 1 && (
+            <div className="grid grid-cols-4 gap-2">
+              {product.image.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(index)}
+                  className={`border-2 rounded-lg overflow-hidden ${
+                    selectedImage === index
+                      ? "border-primary"
+                      : "border-transparent"
+                  }`}
+                >
+                  <Image
+                    src={img}
+                    alt={`${product.name} - Image ${index + 1}`}
+                    width={100}
+                    height={100}
+                    className="w-full h-24 object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right column: Product Info and Add to Cart */}
@@ -115,49 +140,71 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
             <span className="text-pink-600 dark:text-pink-400 text-2xl font-semibold mr-2">
               {formatPrice(product.price)}
             </span>
-            {product.saveAmount && product.saveAmount > 0 && (
+            {product.discountPercentage && product.discountPercentage > 0 && (
               <>
                 <span className="text-gray-500 dark:text-gray-400 line-through mr-4">
-                  {formatPrice(product.price + product.saveAmount)}
+                  {formatPrice(
+                    product.price * (1 + product.discountPercentage / 100)
+                  )}
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">
-                  Save: {formatPrice(product.saveAmount)} (
-                  {product.discountPercentage}%)
+                  Save: {product.discountPercentage}%
                 </span>
               </>
             )}
           </div>
+
+          {/* Product Status and Details */}
           <div className="mb-6 text-gray-800 dark:text-gray-200">
             <p className="mb-1">
               Status: {product.inStock ? "In Stock" : "Out of Stock"}
             </p>
-            <p className="mb-1">Product Code: {product._id}</p>
             <p className="mb-1">Brand: {product.brand}</p>
+            <p className="mb-1">Category: {product.category}</p>
+            <p className="mb-1">Warranty: {product.warranty}</p>
+            {product.isNew && (
+              <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                New Arrival
+              </span>
+            )}
+            {product.isFeatured && (
+              <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">
+                Featured
+              </span>
+            )}
           </div>
 
           {/* Key Features */}
-          <div className="mb-6 text-gray-700 dark:text-gray-300">
-            <h2 className="text-2xl font-semibold mb-3">Key Features</h2>
-            <ul className="list-disc list-inside ml-4">
-              <li>Category: {product.category}</li>
-              <li>Description: {product.description}</li>
-              <li>Available Quantity: {product.quantity}</li>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-3">Key Features</h2>
+            <ul className="list-disc list-inside space-y-2">
+              {product.keyFeatures.map((feature, index) => (
+                <li key={index} className="text-gray-700 dark:text-gray-300">
+                  {feature}
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* View More Info Link */}
-          <div className="mb-6">
-            <a
-              href="#specification-content"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              View More Info
-            </a>
-          </div>
+          {/* Flash Sale Info */}
+          {product.flashSale && product.flashSalePrice && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
+                Flash Sale!
+              </h3>
+              <p className="text-red-700 dark:text-red-300">
+                Special Price: {formatPrice(product.flashSalePrice)}
+              </p>
+              {product.flashSaleEndTime && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                  Ends: {new Date(product.flashSaleEndTime).toLocaleString()}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Quantity and Buy Now Button */}
           <div className="flex items-center mb-6">
-            {/* Quantity selector with plus/minus buttons */}
             <div className="mr-4 flex items-center border rounded-md border-gray-300 dark:border-gray-600">
               <button
                 onClick={() => handleQuantityChange(quantity - 1)}
@@ -179,56 +226,28 @@ const ProductDetailsPage = (props: { params: Promise<{ id: string }> }) => {
                 +
               </button>
             </div>
-            {/* Add to Cart and Buy Now buttons */}
             <div className="flex gap-4">
               <Button
                 onClick={handleAddToCart}
                 className="bg-blue-600 hover:bg-blue-700"
+                disabled={!product.inStock}
               >
                 Add to Cart
               </Button>
               <Button
                 onClick={handleBuyNow}
                 className="bg-green-600 hover:bg-green-700"
+                disabled={!product.inStock}
               >
                 Buy Now
               </Button>
             </div>
           </div>
-
-          {/* Save and Add to Compare */}
-          <div className="flex space-x-6 text-blue-600 dark:text-blue-400 text-sm font-semibold">
-            <button className="hover:underline focus:outline-none">Save</button>
-            <button className="hover:underline focus:outline-none">
-              Add to Compare
-            </button>
-            <p className="text-orange-600">- This tow feature coming soon</p>
-          </div>
         </div>
       </div>
 
-      {/* Tabs Section (Specification, Description, Questions, Reviews) */}
-      <TableSection />
-
-      {/* Related Product Section */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
-          Related Products
-        </h2>
-        {/* Related products grid/list placeholder */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-            <p className="text-gray-700 dark:text-gray-300">
-              Related Product 1
-            </p>
-          </div>
-          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-            <p className="text-gray-700 dark:text-gray-300">
-              Related Product 2
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Tabs Section */}
+      <TableSection product={product} />
     </div>
   );
 };

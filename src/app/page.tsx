@@ -20,7 +20,6 @@ export default function HomePage() {
       try {
         const response = await getAllProducts();
         setProducts(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -29,8 +28,15 @@ export default function HomePage() {
     fetchProducts();
   }, []);
 
-  const featuredProducts = products.slice(0, 8);
-  const newArrivals = products.slice(0, 4);
+  const newArrivals = products
+    .filter((product) => product.isNew === true)
+    .slice(0, 4);
+  const featuredProducts = products
+    .filter((product) => product.isFeatured === true)
+    .slice(0, 4);
+  const flashSaleProducts = products
+    .filter((product) => product.flashSale === true)
+    .slice(0, 4);
 
   const categories = [
     {
@@ -195,7 +201,7 @@ export default function HomePage() {
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
+            {flashSaleProducts.map((product) => (
               <Card key={product._id} className="group">
                 <ProductCard key={product._id} product={product} />
               </Card>

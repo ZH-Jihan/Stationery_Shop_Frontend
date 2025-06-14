@@ -74,7 +74,6 @@ const userMenuItems = [
   { label: "My Account", href: "/account" },
   { label: "Orders", href: "/orders" },
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Settings", href: "/settings" },
 ];
 
 export function Header() {
@@ -106,7 +105,7 @@ export function Header() {
           href="/"
           className="font-bold text-xl sm:text-2xl tracking-tight text-primary"
         >
-          e-comarze
+          AuraShop
         </Link>
 
         {/* Desktop Navigation */}
@@ -262,7 +261,7 @@ export function Header() {
                     className="font-bold text-xl tracking-tight text-primary"
                     onClick={() => setOpen(false)}
                   >
-                    e-comarze
+                    AuraShop
                   </Link>
                 </SheetTitle>
                 <Button

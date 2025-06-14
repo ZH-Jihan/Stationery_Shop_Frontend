@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "e-comarze - Shop the latest products",
+  title: "AuraShop - Shop the latest products",
   description:
     "Your one-stop shop for electronics, fashion, home goods, and beauty products. Discover new arrivals, best sellers, and exclusive deals.",
 };
