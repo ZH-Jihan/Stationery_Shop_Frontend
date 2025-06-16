@@ -1,53 +1,64 @@
+"use client";
+
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 
 interface InfoCardProps {
   title: string;
-  description: string;
-  imageSrc: string;
-  linkText: string;
-  linkHref: string;
-  dark: boolean;
+  data: Record<string, number>;
+  type: "status" | "payment" | "method";
 }
 
-export function InfoCard({
-  title,
-  description,
-  imageSrc,
-  linkText,
-  linkHref,
-  dark,
-}: InfoCardProps) {
+const statusColors = {
+  pending: "bg-yellow-100 text-yellow-800",
+  processing: "bg-blue-100 text-blue-800",
+  shipped: "bg-purple-100 text-purple-800",
+  delivered: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
+};
+
+const paymentColors = {
+  pending: "bg-yellow-100 text-yellow-800",
+  paid: "bg-green-100 text-green-800",
+  failed: "bg-red-100 text-red-800",
+  cancelled: "bg-red-100 text-red-800",
+};
+
+const methodColors = {
+  cod: "bg-blue-100 text-blue-800",
+  sslcommerz: "bg-green-100 text-green-800",
+};
+
+export function InfoCard({ title, data, type }: InfoCardProps) {
+  const colorMap = {
+    status: statusColors,
+    payment: paymentColors,
+    method: methodColors,
+  };
+
+  const colors = colorMap[type];
+
   return (
-    <div
-      className={cn(
-        "relative rounded-lg p-6 overflow-hidden",
-        dark ? "bg-gray-900 text-white" : "bg-white text-gray-900 shadow-md"
-      )}
-    >
-      <Image
-        src={imageSrc}
-        alt={title}
-        layout="fill"
-        objectFit="cover"
-        className="absolute inset-0 z-0 opacity-20"
-      />
-      <div className="relative z-10">
-        <h2 className="text-xl font-bold mb-2">{title}</h2>
-        <p className="text-sm mb-4">{description}</p>
-        <Link
-          href={linkHref}
-          className={cn(
-            "inline-flex items-center gap-1 font-semibold text-sm",
-            dark
-              ? "text-white hover:text-blue-300"
-              : "text-blue-600 hover:text-blue-800"
-          )}
-        >
-          {linkText} <ArrowRight className="w-4 h-4" />
-        </Link>
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        {title}
+      </h2>
+      <div className="space-y-3">
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key} className="flex items-center justify-between">
+            <span
+              className={cn(
+                "px-2 py-1 rounded-full text-xs font-medium capitalize",
+                colors[key as keyof typeof colors] ||
+                  "bg-gray-100 text-gray-800"
+              )}
+            >
+              {key}
+            </span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {value}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

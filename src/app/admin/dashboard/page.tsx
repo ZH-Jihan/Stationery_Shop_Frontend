@@ -1,71 +1,233 @@
-const mockProducts = [
-  { id: "1", name: "Smartphone", price: 499 },
-  { id: "2", name: "Sneakers", price: 89 },
-];
-const mockUsers = [
-  { id: "1", name: "Admin User", email: "admin@demo.com", role: "admin" },
-  { id: "2", name: "Demo User", email: "user@demo.com", role: "user" },
-];
-const mockOrders = [
-  { id: "1001", user: "Demo User", total: 199.99, status: "Delivered" },
-  { id: "1002", user: "Demo User", total: 89.5, status: "Processing" },
-];
+"use client";
 
-export default async function AdminPage() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
-      <div className="mb-4">
-        {/* Welcome, {session.user.name || session.user.email}! */}
+import { InfoCard } from "@/components/dashboard/InfoCard";
+import { SalesChart } from "@/components/dashboard/SalesChart";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import { UsersChart } from "@/components/dashboard/UsersChart";
+import { DashboardStats, getAdminDashboardStats } from "@/services/dashboard";
+import { useEffect, useState } from "react";
+
+export default function AdminPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getAdminDashboardStats();
+        setStats(data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch dashboard stats"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Product Management */}
-        <div className="bg-muted rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Products</h2>
-          <ul className="space-y-2">
-            {mockProducts.map((p) => (
-              <li key={p.id} className="flex justify-between">
-                <span>{p.name}</span>
-                <span>${p.price.toFixed(2)}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="text-muted-foreground text-xs mt-4">
-            Product management coming soon.
-          </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return null;
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Dashboard Overview</h1>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatsCard
+          title="Total Revenue"
+          value={`$${stats.totalRevenue.toLocaleString()}`}
+          change={stats.revenueChange}
+          icon="dollar"
+        />
+        <StatsCard
+          title="Total Orders"
+          value={stats.totalOrders.toLocaleString()}
+          change={stats.ordersChange}
+          icon="shopping-cart"
+        />
+        <StatsCard
+          title="Total Products"
+          value={stats.totalProducts.toLocaleString()}
+          change={stats.productsChange}
+          icon="box"
+        />
+        <StatsCard
+          title="Total Users"
+          value={stats.totalUsers.toLocaleString()}
+          change={stats.usersChange}
+          icon="users"
+        />
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SalesChart data={stats.salesData} />
+        <UsersChart data={stats.userActivity} />
+      </div>
+
+      {/* Recent Orders */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Order ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Payment
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Date
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {stats.recentOrders.map((order) => (
+                <tr key={order.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    #{order.id.slice(-6)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    {order.user}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    ${order.total.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        order.status === "delivered"
+                          ? "bg-green-100 text-green-800"
+                          : order.status === "processing"
+                          ? "bg-blue-100 text-blue-800"
+                          : order.status === "shipped"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        order.paymentStatus === "paid"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {order.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(order.date).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        {/* User Management */}
-        <div className="bg-muted rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Users</h2>
-          <ul className="space-y-2">
-            {mockUsers.map((u) => (
-              <li key={u.id} className="flex justify-between">
-                <span>{u.name}</span>
-                <span className="text-xs">{u.role}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="text-muted-foreground text-xs mt-4">
-            User management coming soon.
-          </div>
+      </div>
+
+      {/* Top Products */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Top Products</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Product
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Stock
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Sales
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {stats.topProducts.map((product) => (
+                <tr key={product.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    {product.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    {product.category}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    ${product.price.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    {product.stock}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    {product.sales}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        {/* Order Management */}
-        <div className="bg-muted rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Orders</h2>
-          <ul className="space-y-2">
-            {mockOrders.map((o) => (
-              <li key={o.id} className="flex justify-between">
-                <span>
-                  #{o.id} ({o.user})
-                </span>
-                <span className="text-xs">{o.status}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="text-muted-foreground text-xs mt-4">
-            Order management coming soon.
-          </div>
-        </div>
+      </div>
+
+      {/* Order Status Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <InfoCard
+          title="Order Status"
+          data={stats.orderStatusCounts}
+          type="status"
+        />
+        <InfoCard
+          title="Payment Status"
+          data={stats.paymentStatusCounts}
+          type="payment"
+        />
+        <InfoCard
+          title="Payment Methods"
+          data={stats.paymentMethodCounts}
+          type="method"
+        />
       </div>
     </div>
   );
