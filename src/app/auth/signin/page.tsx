@@ -71,7 +71,7 @@ function SignInForm() {
         >
           Demo User
         </Button>
-        <Button
+        {/* <Button
           variant="secondary"
           className="w-full"
           onClick={() => {
@@ -80,7 +80,7 @@ function SignInForm() {
           }}
         >
           Demo Admin
-        </Button>
+        </Button> */}
       </div>
 
       <div className="flex justify-between mt-4 text-sm">
